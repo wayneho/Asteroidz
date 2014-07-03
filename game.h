@@ -3,8 +3,8 @@
 
 #include "stdbool.h"
 
-#define N  4            // number of asteroids on the screen at a time (too many will cause lag)
-#define M 2             // speed at which asteroids travel
+#define N  4                // number of asteroids on the screen at a time (too many will cause lag)
+#define M 3                 // speed at which asteroids travel
 #define LASERS 3
 #define LASERSPEED 1
 
@@ -16,10 +16,10 @@ struct State{
   const unsigned short *image;            // ptr->image
   unsigned short imageLength;             // image length
   unsigned char life;                     // 0 = dead
-  unsigned short height;                  // 0 = medium, 1 = large
-  unsigned short width;
-  unsigned short center_x;
-  unsigned short center_y;
+  unsigned short height;                  // height of image BMP
+  unsigned short width;                   // width of image BMP
+  unsigned short center_x;                // center x coordinate of image
+  unsigned short center_y;                // center y coordinate of image
 
 };
 typedef struct State State;
@@ -28,7 +28,7 @@ typedef struct State State;
 struct Player {
     State state;
     unsigned short px1;                   // previous x1 coordinate
-    unsigned short px2;                   // previous x2 coordinate
+    //unsigned short px2;                   // previous x2 coordinate
 };
 
 typedef struct Player sPlayer;
@@ -45,7 +45,7 @@ typedef struct Asteroid sAsteroid;
 
 struct Laser{
     State state;
-    unsigned short direction;           // 1 = up, 0 = down
+    unsigned short direction;           // 1 = up; 0 = down
 
 };
 
@@ -59,12 +59,9 @@ void playerControl(unsigned int);
 void getPlayerPosition(unsigned int);
 
 // asteroid functions
-
-void deployAsteroid(void);
-void addAsteroidMedium(unsigned short index);
-void addAsteroidLarge(unsigned short index);
+void deployAsteroid(void);                              // animation for astroids entering the LCD
+void addAsteroidMedium(unsigned short index);           // updates array with new astroid state
 void deleteAsteroid(unsigned short index);
-unsigned short getAsteroidPosition(unsigned short index);     // return y2 coordinate
 void moveAsteroid(void);
 
 // explosions
@@ -76,12 +73,12 @@ void moveLaser(void);
 
 
 // helper functions
-void printBMP(struct State *sprite);
-void printBMP2(struct State *sprite);       // for printing transparent backgrounds
+void printBMP(struct State *sprite);                    // prints a NxM bitmap
+void printBMP2(struct State *sprite);                   // prints a NxM bitmap with transparent background (must be white)
 void loopGame(void);
-bool collision(struct State *A, struct State *B);
-unsigned short randomValue(void);       // random between 0-189 to place asteroid inside LCD resolution of 240
-void getCenter(struct State *sprite);
+bool collision(struct State *A, struct State *B);       // collision detection using bounding circles algorithm
+unsigned short randomValue(void);                       // random between 0-189 to place asteroid inside LCD resolution of 240
+void getCenter(struct State *sprite);                   // updates the center coordinates of a sprite
 void Init_StartScreen(void);
 
 // functions to display simple text

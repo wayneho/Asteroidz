@@ -259,6 +259,17 @@ void setCursor(unsigned short x,unsigned short y)
 	writeReg(0x004F, y);
 }
 
+// sets the address range
+void setAddress(unsigned int x1,unsigned int y1,unsigned int x2,unsigned int y2)
+{
+    writeReg(0x0044,(x2<<8)+x1);
+    writeReg(0x0045,y1);
+    writeReg(0x0046,y2);
+    writeReg(0x004e,x1);
+    writeReg(0x004f,y1);
+}
+
+// clear entire LCD to a set rgb
 void clearLCD(unsigned short rgb){
 	unsigned int i;
 	setAddress(0,0,239,319);
@@ -269,14 +280,19 @@ void clearLCD(unsigned short rgb){
 	}
 }
 
-
-void setAddress(unsigned int x1,unsigned int y1,unsigned int x2,unsigned int y2)
+// clear an area of the LCD to a set rgb
+void clearArea(unsigned short x1, unsigned short y1,unsigned short x2,unsigned short y2, unsigned short color)
 {
-	writeReg(0x0044,(x2<<8)+x1);
-	writeReg(0x0045,y1);
-	writeReg(0x0046,y2);
-	writeReg(0x004e,x1);
-	writeReg(0x004f,y1);
+    unsigned int i;
+    unsigned short dx, dy;
+    setAddress(x1,y1,x2,y2);
+    dx = x2-x1;
+    dy = y2-y1;
+    writeCmd(0x0022);
+    for(i = 0; i < (dx*dy); i++)
+    {
+       writeData(color);
+    }
 }
 
 unsigned int getX(void){
@@ -311,7 +327,7 @@ unsigned int getY(void){
 // Busy-wait analog to digital conversion
 // Input: none
 // Output: 12-bit result of ADC conversion
-unsigned long ADC0_InSeq3(){
+unsigned long ADC0(){
   unsigned long result;
   ADC0_PSSI_R = 0x0008;                // 1) initiate SS3
   while((ADC0_RIS_R&0x08)==0){};       // 2) wait for conversion done
@@ -320,19 +336,7 @@ unsigned long ADC0_InSeq3(){
   return result;
 }
 
-void clearArea(unsigned short x1, unsigned short y1,unsigned short x2,unsigned short y2, unsigned short color)
-{
-    unsigned int i;
-    unsigned short dx, dy;
-    setAddress(x1,y1,x2,y2);
-    dx = x2-x1;
-    dy = y2-y1;
-    writeCmd(0x0022);
-    for(i = 0; i < (dx*dy); i++)
-    {
-       writeData(color);
-    }
-}
+
 
 
 

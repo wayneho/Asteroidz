@@ -7,12 +7,6 @@
 #define     SPACESHIPWIDTH               30
 #define     SPACESHIPHEIGHT              40
 
-/*
-#define     ALIENSHIPBMP                 800
-#define     ALIENSHIPWIDTH               20
-#define     ALIENSHIPHEIGHT              40
-*/
-
 #define     ASTEROIDBMP_M                 2500
 #define     ASTEROIDHEIGHT_M              50
 #define     ASTEROIDWIDTH_M               50

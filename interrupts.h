@@ -7,7 +7,7 @@
 // initalize ports for interrupt
 void Init_Interrupt(void);
 
-// controls asteroid spawn...for now
+// controls asteroid spawn
 void Init_Timer0A(unsigned long period);
 void Timer0A_Handler(void);
 void Timer0A_Stop(void);

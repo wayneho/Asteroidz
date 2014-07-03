@@ -15,6 +15,7 @@ void Init_Interrupt(void){
     GPIO_PORTA_ICR_R  = 0x80;                                                       //  clear flag PA7
     GPIO_PORTA_IM_R  |= 0x80;                                                       //  enable interrupt on PE3
     NVIC_PRI0_R = (NVIC_PRI0_R&0xFFFFFF0F)|0x00000080;                              //  priority 4
+
     NVIC_EN0_R = 0x00000011;                                                        // enable interrupt vector for Port A, E
 
 }

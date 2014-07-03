@@ -45,7 +45,7 @@ unsigned int getX(void);
 unsigned int getY(void);
 
 // function to get ADC sample
-unsigned long ADC0_InSeq3(void);
+unsigned long ADC0(void);
 
 
 #endif

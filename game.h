@@ -3,7 +3,7 @@
 
 #include "stdbool.h"
 
-#define N  4                // number of asteroids on the screen at a time (too many will cause lag)
+#define N  2                // number of asteroids on the screen at a time (too many will cause lag)
 #define M 3                 // speed at which asteroids travel
 #define LASERS 3
 #define LASERSPEED 1
@@ -84,5 +84,14 @@ void Init_StartScreen(void);
 // functions to display simple text
 void writeString ( unsigned char word[], unsigned short x, unsigned short y, unsigned short background, unsigned short rgb);
 void writeCharacter ( unsigned char character, unsigned short x, unsigned short y, unsigned short background,unsigned short rgb);
+
+// Timer handlers
+void Timer0A_Handler(void);
+void Timer1A_Handler(void);
+void Sound_Handler(void);
+
+// functions for sound
+void DAC_Out(unsigned long data);
+
 
 #endif

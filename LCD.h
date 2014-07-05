@@ -34,8 +34,6 @@ void setCursor(unsigned short x,unsigned short y); //set current pixel to x,y
 void setAddress(unsigned int x1,unsigned int y1,unsigned int x2,unsigned int y2);      // set an address range
 void delayMS(unsigned long ms); // delay in ms using system clock
 
-
-
 // functions for time delay using SysTick
 void Init_SysTick(void);
 void Wait_SysTick(unsigned long delay);

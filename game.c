@@ -7,6 +7,13 @@
 #include "tm4c123gh6pm.h"
 #include "interrupts.h"
 
+#define DAC         (*((volatile unsigned long *)0x400063C0))           // PC 7-4
+
+
+const unsigned char SineWave[30] = {8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7};
+unsigned char Index=0;           // Index varies from 0 to 15
+
+unsigned short tempvalue;
 
 unsigned char semaphore;                           //flag to start game after screen has been touched
 unsigned long TimerCount;                          //counter for time travelled
@@ -85,7 +92,6 @@ void loopGame(void){
                 sprintf(buffer, "%d", num);
                 writeString(words, 15, 30, red, white);
                 writeString(buffer, 165,30, red, white);
-
             }
         }
     }
@@ -258,8 +264,8 @@ void deleteAsteroid(unsigned short index){
 
 // creates new astroid starting at a random x location
 void addAsteroidMedium(unsigned short index){
-    //Asteroid[index].state.x1 = randomValue();
-    Asteroid[index].state.x1 = sliderPosition*0.0513 - (ASTEROIDWIDTH_M - SPACESHIPWIDTH);
+    Asteroid[index].state.x1 = randomValue();
+    //Asteroid[index].state.x1 = sliderPosition*0.0513 - (ASTEROIDWIDTH_M - SPACESHIPWIDTH);
     Asteroid[index].state.x2 = Asteroid[index].state.x1 + (ASTEROIDWIDTH_M-1);
     Asteroid[index].state.y1 = 0;
     Asteroid[index].state.y2 = M;
@@ -434,30 +440,6 @@ void writeCharacter ( unsigned char c, unsigned short x, unsigned short y, unsig
     }
 }
 
-
-// trigger when timer times out
-// initiates an asteroid onto the screen
-void Timer0A_Handler(void){
-  char i;
-  TIMER0_ICR_R = 0x00000001;  // clear interrupt flag
-  for(i = 0; i < N; i++)
-  {
-      if(Asteroid[i].state.life == 0)
-      {
-          addAsteroidMedium(i);
-          return;                   // found open slot for new asteroid
-      }
-
-  }
-}
-
-// keeps track of time traveled
-void Timer1A_Handler(void){
-
-  TIMER1_ICR_R = 0x00000001;  // clear interrupt flag
-  TimerCount++;
-}
-
 // Interrupt to a switch used to fire lasers
 // Priority level 4
 void GPIOPortA_Handler(void){
@@ -495,4 +477,45 @@ void GPIOPortE_Handler(void){
     semaphore = 1;
     Timer0A_Start();
     Timer1A_Start();
+}
+
+// trigger when timer times out
+// initiates an asteroid onto the screen
+void Timer0A_Handler(void){
+  char i;
+  TIMER0_ICR_R = 0x00000001;  // clear interrupt flag
+  for(i = 0; i < N; i++)
+  {
+      if(Asteroid[i].state.life == 0)
+      {
+          addAsteroidMedium(i);
+          return;                   // found open slot for new asteroid
+      }
+
+  }
+}
+
+// keeps track of time traveled
+void Timer1A_Handler(void){
+
+  TIMER1_ICR_R = 0x00000001;  // clear interrupt flag
+  TimerCount++;
+}
+
+void Sound_Handler(void){
+  TIMER2_ICR_R = 0x00000001;  // clear interrupt flag
+  //DAC_Out(SineWave[Index]);    // output one value each interrupt
+  if(Index >= 30){
+      Index = 0;
+  }
+  Index = (Index+1)&0xFF;      // 8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7
+
+  tempvalue++;
+  DAC = SineWave[Index] << 4;
+}
+
+void DAC_Out(unsigned long data){
+
+  DAC = data << 4;
+
 }

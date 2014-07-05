@@ -16,16 +16,20 @@ int main(void)
 
 	// game setup
 	clearLCD(white);
-	Init_Timer0A(40000000);     // 80000000*12.5ns = 1s
-	Init_Timer1A(80000000);
+	//Init_Timer0A(40000000);     // 80000000*12.5ns = 1s
+	//Init_Timer1A(80000000);
+
 	Init_Player();
     Init_Explosions();
     Init_StartScreen();
 
+    Init_Sound(5099);           // 5099 ~523Hz (C note)
+    Sound_Start();
+
 	while(1)
 	{
 
-	    loopGame();
+	    //loopGame();
 	}
 }
 

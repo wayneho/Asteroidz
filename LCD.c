@@ -74,54 +74,53 @@ void Init_PLL(void){
 
 void Init_Port(void) {
 	volatile unsigned long delay;
-	SYSCTL_RCGC2_R |= 0x0000001B;     					// activate clock for Port A, B, C, D, E
+	SYSCTL_RCGC2_R |= 0x0000001F;     					// activate clock for Port A, B, C, D, E
 	SYSCTL_RCGC1_R |= 0x00000010;						// activate clock for SSI0
 	SYSCTL_RCGC0_R |= 0x00010000;   					// activate clock for ADC0
 
 	delay = SYSCTL_RCGC2_R;								// allow time for clock to start
 
-	GPIO_PORTD_LOCK_R = 0x4C4F434B;	 					// unlock GPIO Port D
-	GPIO_PORTD_CR_R |= 0xFF;
 
-	GPIO_PORTA_AMSEL_R &= ~0xFC;
-	GPIO_PORTB_AMSEL_R &= ~0xFF;
-	GPIO_PORTD_AMSEL_R &= ~0xFF;
-	GPIO_PORTE_AMSEL_R &= ~0x3D;
-	GPIO_PORTE_AMSEL_R |= 0x02;							// enable analog for PE1
+	GPIO_PORTC_LOCK_R = 0x4C4F434B;	 					// unlock GPIO Port C
+	GPIO_PORTD_LOCK_R = 0x4C4F434B;                     // unlock GPIO Port D
+	GPIO_PORTD_CR_R |= 0xFF;                            // allow registers in Port D to be written to
+
+	GPIO_PORTA_AMSEL_R &= ~0xFC;                        // disable analog mode for PA 7-2
+	GPIO_PORTB_AMSEL_R &= ~0xFF;                        // disable analog mode for PB 7-0
+	GPIO_PORTC_AMSEL_R &= ~0xF0;                        // disable analog mode for PC 7-4
+	GPIO_PORTD_AMSEL_R &= ~0xFF;                        // disable analog mode for PD 7-0
+	GPIO_PORTE_AMSEL_R &= ~0x3D;                        // disable analog mode for PE 5,4,3,2,0
+	GPIO_PORTE_AMSEL_R |= 0x02;							// enable analog mode for PE1
 	
-	GPIO_PORTA_AFSEL_R &= 0x80;                         // clear PA7
+	GPIO_PORTA_AFSEL_R &= 0x80;                         // disable alternative function for PA 7
 	GPIO_PORTA_AFSEL_R |= 0x3C;       				  	// enable alternative function for PA 5,4,3,2
-	GPIO_PORTB_AFSEL_R &= ~0xFF;
-	GPIO_PORTD_AFSEL_R &= ~0xFF;
-	GPIO_PORTE_AFSEL_R &= ~0x3D;
+	GPIO_PORTB_AFSEL_R &= ~0xFF;                        // disable alternative function for PB 7-0
+	GPIO_PORTC_AFSEL_R &= ~0xF0;                        // disable alternative function for PC 7-4
+	GPIO_PORTD_AFSEL_R &= ~0xFF;                        // disable alternative function for PD 7-0
+	GPIO_PORTE_AFSEL_R &= ~0x3D;                        // disable alternative function for PE 5,4,3,2,0
 	GPIO_PORTE_AFSEL_R |= 0x02;							// enable alternative function for PE1
 	
 	GPIO_PORTA_PCTL_R = 0x00222200;   					// SSI0 functions for PA 5,4,3,2
-	GPIO_PORTB_PCTL_R = 0x00000000;
-	GPIO_PORTD_PCTL_R = 0x00000000;
-	GPIO_PORTE_PCTL_R = 0x00000000;
+	GPIO_PORTB_PCTL_R = 0x00000000;                     // GPIO functions for PB
+	GPIO_PORTC_PCTL_R &= ~0xFFFF0000;                   // GPIO functions for PC 7-4
+	GPIO_PORTD_PCTL_R = 0x00000000;                     // GPIO functions for PD
+	GPIO_PORTE_PCTL_R = 0x00000000;                     // GPIO functions for PE
 	
-	GPIO_PORTA_DIR_R &= 0x80;                           // PA 7 in
-	GPIO_PORTB_DIR_R |= 0xFF;
-	GPIO_PORTD_DIR_R |= 0xFF;									
-	GPIO_PORTE_DIR_R  = 0x35;							// PE1,3 in
+	GPIO_PORTA_DIR_R &= 0x80;                           // input for PA 7; output for PA 6-0
+	GPIO_PORTB_DIR_R |= 0xFF;                           // output for PB 7-0
+	GPIO_PORTC_DIR_R |= 0xF0;                           // output for PC 7-4
+	GPIO_PORTD_DIR_R |= 0xFF;                           // output for PD 7-0
+	GPIO_PORTE_DIR_R  = 0x35;							// input for PE 1,3; output for PE 5,4,2,0
+
 	
-
-//	GPIO_PORTA_ODR_R |= 0x80;							// enable open drain
-//	GPIO_PORTB_ODR_R |= 0xFF;
-//	GPIO_PORTD_ODR_R |= 0xFF;
-//	GPIO_PORTE_ODR_R |= 0x3F;
-
-
-	GPIO_PORTA_PUR_R |= 0x90;							// enable pull up for PA 7, 6
-//	GPIO_PORTB_PUR_R |= 0xFF;
-//	GPIO_PORTD_PUR_R |= 0xFF;
-	GPIO_PORTE_PUR_R |= 0x08;                           // pull up for PE 3
+	GPIO_PORTA_PUR_R |= 0xC0;							// enable pull up resistor for PA 7, 6
+	GPIO_PORTE_PUR_R |= 0x08;                           // enable pull up resistor for PE 3
 	
-	GPIO_PORTA_DEN_R |= 0x80;          					// enable digital I/O
-	GPIO_PORTB_DEN_R |= 0xFF; 
-	GPIO_PORTD_DEN_R |= 0xFF; 
-	GPIO_PORTE_DEN_R |= 0x3D; 							// PE1 is analog
+	GPIO_PORTA_DEN_R |= 0x80;          					// enable digital I/O for PA 7-4
+	GPIO_PORTB_DEN_R |= 0xFF;                           // enable digital I/O for PB 7-0
+	GPIO_PORTC_DEN_R |= 0xF0;                           // enable digital I/O for PC 7-4
+	GPIO_PORTD_DEN_R |= 0xFF;                           // enable digital I/O for PD 7-0
+	GPIO_PORTE_DEN_R |= 0x3D;                           // enable digital I/O for PE 5,4,3,2,0
 	
 }
 
@@ -209,7 +208,7 @@ void Init_Analog(void){
 	                                    //    0x1 250K samples/second
 	                                    //    0x0 125K samples/second
 
-	ADC0_SSPRI_R = 0x0123;				// sequencer 3 is highest priority
+	ADC0_SSPRI_R = 0x0123;				// set sequencer 3 to highest priority
 	ADC0_ACTSS_R &= ~0x0008;			// disable sequencer 3 for configuration
 	ADC0_EMUX_R &= ~0xF000;				// seq3 continuously sample
 	ADC0_SSMUX3_R &= ~0x000F;       	// clear SS3 field
@@ -323,7 +322,7 @@ unsigned int getY(void){
 	return coordinate;
 }
 
-//------------ADC_InSeq3------------
+//------------ADC------------
 // Busy-wait analog to digital conversion
 // Input: none
 // Output: 12-bit result of ADC conversion

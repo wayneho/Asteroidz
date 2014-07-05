@@ -88,7 +88,7 @@ void Init_Sound(unsigned long period){
     TIMER2_IMR_R = 0x00000001;          // enable time out interrupt for timer2A
     NVIC_PRI5_R = (NVIC_PRI5_R&0x00FFFFFF)|0x80000000;      // priority 4
     NVIC_EN0_R = 1<<23;                 // enable IRQ 21
-    //TIMER2_CTL_R = 0x00000001;          // enable timer2A
+    TIMER2_CTL_R = 0x00000001;          // enable timer2A
 
 }
 

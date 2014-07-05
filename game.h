@@ -90,8 +90,7 @@ void Timer0A_Handler(void);
 void Timer1A_Handler(void);
 void Sound_Handler(void);
 
-// functions for sound
-void DAC_Out(unsigned long data);
+
 
 
 #endif

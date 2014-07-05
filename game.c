@@ -13,7 +13,7 @@
 const unsigned char SineWave[30] = {8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7};
 unsigned char Index=0;           // Index varies from 0 to 15
 
-unsigned short tempvalue;
+unsigned char tempvalue;
 
 unsigned char semaphore;                           //flag to start game after screen has been touched
 unsigned long TimerCount;                          //counter for time travelled
@@ -73,10 +73,11 @@ void Init_Explosions(void){
 // calls the necessary functions to start game
 void loopGame(void){
     int i;
+    char note = 0;
 
     if (semaphore)
     {
-        sliderPosition = ADC0();         // get conversion from slide pot
+        sliderPosition = ADC0();                // get conversion from slide pot
         getPlayerPosition(sliderPosition);      // get previous position of player
         playerControl(sliderPosition);          // move player according to slide potentiometer value
         //moveLaser();
@@ -86,12 +87,20 @@ void loopGame(void){
         for(i=0;i<N; i++)
         {
             while(collision(&Player.state, &Asteroid[i].state)){
-                Timer1A_Stop();
+                Timer1A_Stop();                                         // stop time-travelled timer
                 int num = TimerCount;
                 unsigned char words[] = {"TIME TRAVELLED(s): "};
                 sprintf(buffer, "%d", num);
                 writeString(words, 15, 30, red, white);
                 writeString(buffer, 165,30, red, white);
+
+                if(note == 0){
+                    Init_Sound(6061);                                   // 6061 ~440Hz (A note)
+                }
+                else{
+                    Init_Sound(8081);                                   // 8081 ~330Hz (E note)
+                }
+                note ^= 1;                                              // alternate bewteen the two notes to create an annoying sound
             }
         }
     }
@@ -106,7 +115,7 @@ void Init_StartScreen(void)
     writeCmd(0x0022);
     for(i = 0; i < 76800; i++)
     {
-        //writeData(startImage[i]);
+        writeData(startImage[i]);
     }
 }
 
@@ -510,12 +519,6 @@ void Sound_Handler(void){
   }
   Index = (Index+1)&0xFF;      // 8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7
 
-  tempvalue++;
   DAC = SineWave[Index] << 4;
 }
 
-void DAC_Out(unsigned long data){
-
-  DAC = data << 4;
-
-}

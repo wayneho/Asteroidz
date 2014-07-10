@@ -1,13 +1,8 @@
 #include "LCD.H"
 #include "tm4c123gh6pm.h"
 
-
-
-
 // 16 to 8 bit 8080-series parallel interface
-#define LCD_DataBus						  GPIO_PORTB_DATA_R 				// PB 7-0 = DIN 7-0
-
-
+#define LCD_DataBus						        GPIO_PORTB_DATA_R 				                // PB 7-0 = DIN 7-0
 #define LCD_RS			 						(*((volatile unsigned long *)0x40007010))	  	// PD2; data = 1, command = 0
 #define LCD_RD 									(*((volatile unsigned long *)0x40007020))		// PD3; data read latch signal when low
 #define LCD_WR  								(*((volatile unsigned long *)0x40007100))		// PD6; write = 0, read = 1
@@ -37,19 +32,27 @@
 unsigned int TS_X;
 unsigned int TS_Y;
 
-// Setting up SysTick time delay
+// Initialize system clock
+// Inputs: none
+// Outputs: none
 void Init_SysTick(void){
   NVIC_ST_CTRL_R = 0;                               // disable SysTick during setup
   NVIC_ST_CTRL_R = 0x00000005;                      // enable SysTick with core clock
 }
 
+// System clock time delay
+// Inputs: delay
+// Outputs: none
 void Wait_SysTick(unsigned long delay){
   NVIC_ST_RELOAD_R = delay-1;                       // number of counts to wait
   NVIC_ST_CURRENT_R = 0;                            // any value written to CURRENT clears
   while((NVIC_ST_CTRL_R&0x00010000)==0){            // wait for count flag
   }
 }
-// 80000 * 12.5ns (80Mhz clock) = 1ms
+
+// Delay function based on the system clock
+// Inputs: delay in millisecs
+// Outputs: none
 void delayMS(unsigned long ms){
   unsigned long i;
   Init_SysTick();
@@ -57,7 +60,9 @@ void delayMS(unsigned long ms){
       Wait_SysTick(80000);                            // wait 1ms
   }
 }
-
+// Initalizes PLL for 80Mhz
+// Inputs: none
+// Outputs: none
 void Init_PLL(void){
     SYSCTL_RCC2_R |=  0x80000000;                   // use RCC2
     SYSCTL_RCC2_R |=  0x00000800;                   // BYPASS2, PLL bypass
@@ -72,6 +77,9 @@ void Init_PLL(void){
     SYSCTL_RCC2_R &= ~0x00000800;                   // enable use of PLL by clearing BYPASS
 }
 
+// Port Initialisation
+// Inputs: none
+// Outputs: none
 void Init_Port(void) {
 	volatile unsigned long delay;
 	SYSCTL_RCGC2_R |= 0x0000001F;     					// activate clock for Port A, B, C, D, E
@@ -126,7 +134,9 @@ void Init_Port(void) {
 
 
 
-
+// Initialisation sequence to start LCD
+// Inputs: none
+// Outputs: none
 void Init_LCD(void)
 {
 	
@@ -190,6 +200,9 @@ void Init_LCD(void)
 	delayMS(5);
 }
 
+// Initalizes SSI0 at 2Mhz
+// Inputs: none
+// Outputs: none
 void Init_SSI0(void){
 	SSI0_CR1_R = 0x0;					// clear SSE bit
 	SSI0_CR1_R = 0x0;					// set SSI0 as master
@@ -199,6 +212,9 @@ void Init_SSI0(void){
 	SSI0_CR1_R |= 0x2;					// enable SSI
 }
 
+// Initalizes ADC0 - Sequencer 3
+// Inputs: none
+// Outputs: none
 void Init_Analog(void){
 
 	SYSCTL_RCGC0_R |= 0x00000200;  	    //  analog sample speed: 500k
@@ -213,11 +229,14 @@ void Init_Analog(void){
 	ADC0_EMUX_R &= ~0xF000;				// seq3 continuously sample
 	ADC0_SSMUX3_R &= ~0x000F;       	// clear SS3 field
 	ADC0_SSMUX3_R += 2;             	// set channel Ain2 (PE1)
-	ADC0_SSCTL3_R = 0x0006;         	//  no TS0 D0, yes IE0 END0
-	ADC0_ACTSS_R |= 0x0008;         	//  enable sample sequencer 3
+	ADC0_SSCTL3_R = 0x0006;         	// no TS0 D0, yes IE0 END0
+	ADC0_ACTSS_R |= 0x0008;         	// enable sample sequencer 3
 
 }
 
+// writes a command to the databus
+// Inputs: 16bit command
+// Outputs: none
 void writeCmd(unsigned short cmd){
 	LCD_RS = 0x00;
 	LCD_CS = 0x00;
@@ -231,7 +250,9 @@ void writeCmd(unsigned short cmd){
 	LCD_WR = 0xFF;
 	LCD_CS = 0xFF;
 }
-
+// writes data to the databus
+// Inputs: 16bit data
+// Outputs: none
 void writeData(unsigned short data){
 	LCD_RS = 0xFF;
 	LCD_CS = 0x00;
@@ -246,19 +267,27 @@ void writeData(unsigned short data){
 	LCD_CS = 0xFF;
 }
 
+// comebines writeCmd and writeDat
+// Inputs: command and data
+// Outputs: none
 void writeReg(unsigned short cmd,unsigned short data)
 {
 	writeCmd(cmd);
 	writeData(data);
 }
 
+// Sets the beginning address in the graphics display data ram (GDDRAM)
+// Inputs: x1,y1
+// Outputs: none
 void setCursor(unsigned short x,unsigned short y)
 {
 	writeReg(0x004E, x);
 	writeReg(0x004F, y);
 }
 
-// sets the address range
+// Sets the address window in the GDDRAM
+// Inputs: x1,y1,x2,y2 coordinates
+// Outputs: none
 void setAddress(unsigned int x1,unsigned int y1,unsigned int x2,unsigned int y2)
 {
     writeReg(0x0044,(x2<<8)+x1);
@@ -268,7 +297,9 @@ void setAddress(unsigned int x1,unsigned int y1,unsigned int x2,unsigned int y2)
     writeReg(0x004f,y1);
 }
 
-// clear entire LCD to a set rgb
+// Clears the entire LCD screen
+// Inputs: color of background
+// Outputs: none
 void clearLCD(unsigned short rgb){
 	unsigned int i;
 	setAddress(0,0,239,319);
@@ -279,7 +310,9 @@ void clearLCD(unsigned short rgb){
 	}
 }
 
-// clear an area of the LCD to a set rgb
+// Clears a certain area on the LCD screen
+// Inputs: x1,y1,x2,y2 coordinates and color of area to be cleared
+// Outputs: none
 void clearArea(unsigned short x1, unsigned short y1,unsigned short x2,unsigned short y2, unsigned short color)
 {
     unsigned int i;
@@ -294,6 +327,9 @@ void clearArea(unsigned short x1, unsigned short y1,unsigned short x2,unsigned s
     }
 }
 
+// Requests the x coordinate from the touchscreen controller
+// Inputs: none
+// Outputs: 12-bit conversion
 unsigned int getX(void){
 	unsigned int coordinate = 0;
 	//TS_CS	 = 0x00;										// set touchscreen chip select
@@ -308,6 +344,9 @@ unsigned int getX(void){
 	return coordinate;
 }
 
+// Requests the y coordinate from the touchscreen controller
+// Inputs: none
+// Outputs: 12-bit ADC conversion
 unsigned int getY(void){
 	unsigned int coordinate = 0;
 	//TS_CS	 = 0x00;											// set touchscreen chip select
@@ -324,8 +363,8 @@ unsigned int getY(void){
 
 //------------ADC------------
 // Busy-wait analog to digital conversion
-// Input: none
-// Output: 12-bit result of ADC conversion
+// Inputs: none
+// Outputs: 12-bit result of ADC conversion
 unsigned long ADC0(){
   unsigned long result;
   ADC0_PSSI_R = 0x0008;                // 1) initiate SS3

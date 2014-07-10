@@ -18,15 +18,14 @@ int main(void)
 	clearLCD(white);
 	Init_Timer0A(40000000);     // 80000000*12.5ns = 1s
 	Init_Timer1A(80000000);
-
 	Init_Player();
     Init_Explosions();
     Init_StartScreen();
 
 	while(1)
 	{
-
 	    loopGame();
+
 	}
 }
 

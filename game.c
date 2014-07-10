@@ -7,13 +7,12 @@
 #include "tm4c123gh6pm.h"
 #include "interrupts.h"
 
-#define DAC         (*((volatile unsigned long *)0x400063C0))           // PC 7-4
+#define DAC         (*((volatile unsigned long *)0x400063C0))           // 4 bit weighted resistor DAC; PC 7-4
 
 
-const unsigned char SineWave[30] = {8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7};
-unsigned char Index=0;           // Index varies from 0 to 15
+const unsigned char SineWave[30] = {8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7};        // annoying noise
+unsigned char Index=0;
 
-unsigned char tempvalue;
 
 unsigned char semaphore;                           //flag to start game after screen has been touched
 unsigned long TimerCount;                          //counter for time travelled
@@ -28,7 +27,9 @@ sAsteroid Asteroid[N];
 sLaser Laser[LASERS];
 
 
-// set the image and initial position of the space ship
+// Initializes the player image and gives it a starting location on the LCD
+// Inputs: none
+// Outputs: none
 void Init_Player(void){
     Player.state.x1 = 110;
     Player.state.y1 = 250;
@@ -40,7 +41,9 @@ void Init_Player(void){
     Player.state.height = SPACESHIPHEIGHT;
 }
 
-// set up explosion animation  images
+// Sets the explosion animations to the correct images
+// Inputs: none
+// Outputs: none
 void Init_Explosions(void){
     Explosion[0].x1 = 0;
     Explosion[0].y1 = 0;
@@ -70,16 +73,18 @@ void Init_Explosions(void){
     Explosion[2].height = EXPLOSION3_HEIGHT;
 }
 
-// calls the necessary functions to start game
+// Calls the neccessary functions to start the game
+// Inputs: none
+// Outputs: none
 void loopGame(void){
     int i;
     char note = 0;
 
     if (semaphore)
     {
-        sliderPosition = ADC0();                // get conversion from slide pot
-        getPlayerPosition(sliderPosition);      // get previous position of player
-        playerControl(sliderPosition);          // move player according to slide potentiometer value
+        sliderPosition = ADC0();                        // get conversion from slide pot
+        getPlayerPosition(sliderPosition);              // get previous position of player
+        playerControl(sliderPosition);                  // move player according to slide potentiometer value
         //moveLaser();
         deployAsteroid();
         moveAsteroid();
@@ -87,7 +92,7 @@ void loopGame(void){
         for(i=0;i<N; i++)
         {
             while(collision(&Player.state, &Asteroid[i].state)){
-                Timer1A_Stop();                                         // stop time-travelled timer
+                Timer1A_Stop();
                 int num = TimerCount;
                 unsigned char words[] = {"TIME TRAVELLED(s): "};
                 sprintf(buffer, "%d", num);
@@ -107,7 +112,9 @@ void loopGame(void){
 
 }
 
-// displays the starting screen image
+// Displays the starting image
+// Inputs: none
+// Outputs: none
 void Init_StartScreen(void)
 {
     int i ;
@@ -119,7 +126,9 @@ void Init_StartScreen(void)
     }
 }
 
-// updates center coordinate of a sprite
+// Updates center coordinate of a sprite
+// Inputs: Sprite
+// Outputs: none
 void getCenter(struct State *sprite)
 {
     sprite->center_x = (sprite->x2 - sprite->x1)/2 + sprite->x1;       // get center x coordinate
@@ -127,7 +136,9 @@ void getCenter(struct State *sprite)
 }
 
 
-// prints the image of a sprite
+// Prints the image of a sprite
+// Inputs: Sprite
+// Outputs: none
 void printBMP(struct State *sprite){
     int i;
     writeCmd(0x0022);
@@ -138,9 +149,10 @@ void printBMP(struct State *sprite){
 }
 
 
-// print sprites with transparent background
+// Prints sprites with transparent background
 // transparent color = 0xFFFF
-// slow
+// Inputs: Sprite
+// Outputs: none
 void printBMP2(struct State *sprite){
     int i;
     int row, column;
@@ -170,7 +182,9 @@ void printBMP2(struct State *sprite){
 
 
 
-// control the rocket ship using a 10k slide potentiometer
+// Controls the rocket ship using a 10k slide potentiometer
+// Inputs: 12 bit ADC sample
+// Outputs: none
 void playerControl(unsigned int slider){
     int sliderValue= slider*0.0513;             // 12 bit ADC - 220pixels/4096values = ~0.0537
 
@@ -188,13 +202,17 @@ void playerControl(unsigned int slider){
     }
 }
 
-// get previous position of the space ship
+// Get previous position of the space ship
 // LCD:ADC ratio is 0.0513 (220/4096)
+// Inputs: 12 bit ADC sample
+// Outputs: none
 void getPlayerPosition(unsigned int slider){
     Player.px1 = slider*0.0513;
 }
 
 // Function to animate an asteroid entering the LCD
+// Inputs: none
+// Outputs: none
 void deployAsteroid(void){
     char i;
     int j;
@@ -236,8 +254,10 @@ void deployAsteroid(void){
 }
 
 
-// move asteroid vertically down by M pixel(s)
+// Moves the asteroid vertically down by M pixel(s)
 // deletes the asteroid if it has gone outside the screen resolution
+// Inputs: none
+// Outputs: none
 void moveAsteroid(void){
     char i;
     for(i=0; i < N; i++)
@@ -264,14 +284,16 @@ void moveAsteroid(void){
     }
 }
 
-
-// asteroid has reached the bottom of the LCD
-// sets the life to 0 to be overwritten by a new asteroid position
+// Sets the life to 0 to be overwritten by a new asteroid
+// Inputs: index of asteroid to delete
+// Outputs: none
 void deleteAsteroid(unsigned short index){
     Asteroid[index].state.life = 0;
 }
 
-// creates new astroid starting at a random x location
+// Creates new astroid starting at a random x location
+// Inputs: index of Asteriod struct array with life = 0
+// Outputs: none
 void addAsteroidMedium(unsigned short index){
     Asteroid[index].state.x1 = randomValue();
     //Asteroid[index].state.x1 = sliderPosition*0.0513 - (ASTEROIDWIDTH_M - SPACESHIPWIDTH);
@@ -286,9 +308,9 @@ void addAsteroidMedium(unsigned short index){
     Asteroid[index].state.width = ASTEROIDWIDTH_M;
 }
 
-// Function to detect the collision between two sprites
-// using bounding circles algorithm
-// returns true if collision
+// Function to detect the collision between two sprites using bounding circles algorithm
+// Inputs: 2 sprite structs
+// Outputs: true if collision detected
 bool collision(struct State *A, struct State *B)
 {
     int i;
@@ -347,7 +369,9 @@ bool collision(struct State *A, struct State *B)
 
 }
 
-
+// Adds a laser beam to the Laser Struct array
+// Inputs: index in the array
+// Outputs: none
 void addLaser(unsigned short index)
 {
     getCenter(&Player.state);
@@ -365,7 +389,9 @@ void addLaser(unsigned short index)
     printBMP(&Laser[index].state);
 }
 
-
+// Move all lasers depending on direction and speed
+// Inputs: none
+// Outputs: none
 void moveLaser(void)
 {
     int i;
@@ -400,9 +426,11 @@ void moveLaser(void)
 }
 
 
-// gives a random value between 0 and 189
+// Generates a random value between 0 and 189
 // screen width: 240 pixels
 // asteroid width: 50 pixels
+// Inputs: none
+// Outputs: random value (0-189)
 unsigned short randomValue(void){
     char i;
 
@@ -414,8 +442,9 @@ unsigned short randomValue(void){
     return i;
 }
 
-// displays a string onto the LCD
-// set background rgb and text rgb
+// Displays a string onto the LCD and set the background rgb and string rgb
+// Inputs: string to be displayed, x and y position, color of string and color of background
+// Outputs: none
 void writeString ( unsigned char word [], unsigned short x, unsigned short y, unsigned short textrgb , unsigned short background)
 {
     int i =0;
@@ -426,8 +455,9 @@ void writeString ( unsigned char word [], unsigned short x, unsigned short y, un
     }
 }
 
-// displays a single character on the screen using a lookup table
-// set background rgb and text rgb
+// Displays a single character onto the LCD and set the background rgb and character rgb
+// Inputs: character to be displayed, x and y position, color of text and color of background
+// Outputs: none
 void writeCharacter ( unsigned char c, unsigned short x, unsigned short y, unsigned short textrgb , unsigned short background)
 {
     int i = 0;
@@ -451,6 +481,8 @@ void writeCharacter ( unsigned char c, unsigned short x, unsigned short y, unsig
 
 // Interrupt to a switch used to fire lasers
 // Priority level 4
+// Inputs: none
+// Outputs: none
 void GPIOPortA_Handler(void){
     int i;
     GPIO_PORTA_ICR_R = 0x80;    // clear interrupt flag
@@ -469,8 +501,10 @@ void GPIOPortA_Handler(void){
 
 }
 
-// touchscreen interrupt for starting game
+// Touchscreen interrupt for starting game
 // Priority level 5
+// Inputs: none
+// Outputs: none
 void GPIOPortE_Handler(void){
     int i;
     unsigned char *word[] = {"3", "2", "1","START"};
@@ -488,8 +522,10 @@ void GPIOPortE_Handler(void){
     Timer1A_Start();
 }
 
+// Initiates an asteroid onto the screen
 // trigger when timer times out
-// initiates an asteroid onto the screen
+// Inputs: none
+// Outputs: none
 void Timer0A_Handler(void){
   char i;
   TIMER0_ICR_R = 0x00000001;  // clear interrupt flag
@@ -504,13 +540,18 @@ void Timer0A_Handler(void){
   }
 }
 
-// keeps track of time traveled
+// Keeps track of time traveled with a counter
+// Inputs: none
+// Outputs: none
 void Timer1A_Handler(void){
 
   TIMER1_ICR_R = 0x00000001;  // clear interrupt flag
   TimerCount++;
 }
 
+// Creates sound when player crashes into an asteroid
+// Inputs: none
+// Outputs: none
 void Sound_Handler(void){
   TIMER2_ICR_R = 0x00000001;  // clear interrupt flag
   //DAC_Out(SineWave[Index]);    // output one value each interrupt

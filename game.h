@@ -8,6 +8,8 @@
 #define LASERS 3
 #define LASERSPEED 1
 
+//  this struct holds variables for object information such as:
+//  coordinates, life, sprite image, etc..
 struct State{
   unsigned short x1;                      // current x1
   unsigned short y1;                      // current y1
@@ -24,31 +26,32 @@ struct State{
 };
 typedef struct State State;
 
-
+//  this struct inherits from the struct State and contains the previous coordinate
+//  to debounce rapid changes in the pot slider
 struct Player {
     State state;
     unsigned short px1;                   // previous x1 coordinate
-    //unsigned short px2;                   // previous x2 coordinate
+    //unsigned short px2;                 // previous x2 coordinate
 };
-
 typedef struct Player sPlayer;
+
+//  this struct inherits from the struct State and contains the row for asteroids
+//  entering the screen animation
 
 struct Asteroid{
     State state;
     unsigned short row;                  // row deploy animation
 
 };
-
-
 typedef struct Asteroid sAsteroid;
 
-
+//  this struct inherits from the struct State and contains the direction of the
+//  laser beam
 struct Laser{
     State state;
     unsigned short direction;           // 1 = up; 0 = down
 
 };
-
 typedef struct Laser sLaser;
 
 
@@ -85,11 +88,12 @@ void Init_StartScreen(void);
 void writeString ( unsigned char word[], unsigned short x, unsigned short y, unsigned short background, unsigned short rgb);
 void writeCharacter ( unsigned char character, unsigned short x, unsigned short y, unsigned short background,unsigned short rgb);
 
-// Timer handlers
+// Interrupt handlers
 void Timer0A_Handler(void);
 void Timer1A_Handler(void);
 void Sound_Handler(void);
-
+void GPIOPortA_Handler(void);
+void GPIOPortE_Handler(void);
 
 
 

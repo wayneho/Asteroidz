@@ -22,9 +22,7 @@ void Init_Sound(unsigned long period);
 void Sound_Stop(void);
 void Sound_Start(void);
 
-// interrupt functions
-void GPIOPortA_Handler(void);
-void GPIOPortE_Handler(void);
+
 
 
 #endif

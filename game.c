@@ -83,7 +83,7 @@ void Init_StartScreen(void)
     writeCmd(0x0022);
     for(i = 0; i < 76800; i++)
     {
-        //writeData(startImage[i]);
+        writeData(startImage[i]);
     }
 }
 
@@ -91,7 +91,7 @@ void Init_StartScreen(void)
 // Inputs: none
 // Outputs: none
 void displayEndScreen(void){
-    Timer1A_Stop();                                     // disable time travelled timer
+    Distance_Stop();                                     // stop distance counter
     int num = TimerCount;
     char words[] = {"TIME TRAVELLED(s): "};
     sprintf(buffer, "%i", num);
@@ -514,15 +514,15 @@ void GPIOPortE_Handler(void){
     displayCountDown();
     GPIO_PORTE_ICR_R = 0x08;    // clear interrupt flag
     semaphore = 1;
-    Timer0A_Start();
-    Timer1A_Start();
+    Asteroid_Start();
+    Distance_Start();
 }
 
 // Initiates an asteroid onto the screen
 // trigger when timer times out
 // Inputs: none
 // Outputs: none
-void Timer0A_Handler(void){
+void Asteroid_Handler(void){
   char i;
   TIMER0_ICR_R = 0x00000001;  // clear interrupt flag
   for(i = 0; i < N; i++)
@@ -539,7 +539,7 @@ void Timer0A_Handler(void){
 // Keeps track of time traveled with a counter
 // Inputs: none
 // Outputs: none
-void Timer1A_Handler(void){
+void Distance_Handler(void){
 
   TIMER1_ICR_R = 0x00000001;  // clear interrupt flag
   TimerCount++;

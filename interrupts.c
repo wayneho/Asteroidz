@@ -46,14 +46,14 @@ void Init_Timer0A(unsigned long period){
 // Stop Timer0A
 // Inputs: none
 // Outputs: none
-void Timer0A_Stop(void){
+void Asteroid_Stop(void){
   TIMER0_CTL_R &= ~0x00000001; // disable
 }
 
 // Start Timer0A
 // Inputs: none
 // Outputs: none
-void Timer0A_Start(void){
+void Asteroid_Start(void){
   TIMER0_CTL_R |= 0x00000001;   // enable
 }
 
@@ -82,14 +82,14 @@ void Init_Timer1A(unsigned long period){
 // Stop Timer1A
 // Inputs: none
 // Outputs: none
-void Timer1A_Stop(void){
+void Distance_Stop(void){
   TIMER1_CTL_R &= ~0x00000001; // disable
 }
 
 // Start Timer1A
 // Inputs: none
 // Outputs: none
-void Timer1A_Start(void){
+void Distance_Start(void){
   TIMER1_CTL_R |= 0x00000001;   // enable
 }
 

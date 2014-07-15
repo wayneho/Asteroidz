@@ -9,13 +9,13 @@ void Init_Interrupt(void);
 
 // controls asteroid spawn
 void Init_Timer0A(unsigned long period);
-void Timer0A_Stop(void);
-void Timer0A_Start(void);
+void Asteroid_Stop(void);
+void Asteroid_Start(void);
 
 // keeps track of time travelled
 void Init_Timer1A(unsigned long period);
-void Timer1A_Stop(void);
-void Timer1A_Start(void);
+void Distance_Stop(void);
+void Distance_Start(void);
 
 // intialize sound
 void Init_Sound(unsigned long period);

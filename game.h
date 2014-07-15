@@ -95,8 +95,8 @@ void writeCharacter (unsigned char character, unsigned short x, unsigned short y
 
 
 // Interrupt handlers
-void Timer0A_Handler(void);
-void Timer1A_Handler(void);
+void Asteroid_Handler(void);
+void Distance_Handler(void);
 void Sound_Handler(void);
 void GPIOPortA_Handler(void);
 void GPIOPortE_Handler(void);

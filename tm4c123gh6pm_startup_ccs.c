@@ -35,8 +35,8 @@ static void FaultISR(void);
 static void IntDefaultHandler(void);
 void GPIOPortE_Handler(void);
 void GPIOPortA_Handler(void);
-void Timer0A_Handler(void);
-void Timer1A_Handler(void);
+void Asteroid_Handler(void);
+void Distance_Handler(void);
 void Sound_Handler(void);
 
 //*****************************************************************************
@@ -107,9 +107,9 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // ADC Sequence 2
     IntDefaultHandler,                      // ADC Sequence 3
     IntDefaultHandler,                      // Watchdog timer
-    Timer0A_Handler,                        // Timer 0 subtimer A
+    Asteroid_Handler,                        // Timer 0 subtimer A
     IntDefaultHandler,                      // Timer 0 subtimer B
-    Timer1A_Handler,                        // Timer 1 subtimer A
+    Distance_Handler,                        // Timer 1 subtimer A
     IntDefaultHandler,                      // Timer 1 subtimer B
     Sound_Handler,                          // Timer 2 subtimer A
     IntDefaultHandler,                      // Timer 2 subtimer B

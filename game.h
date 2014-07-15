@@ -8,9 +8,12 @@
 #define LASERS 3
 #define LASERSPEED 1
 
+extern unsigned char semaphore;          //flag to start game after screen has been touched
+extern unsigned int sliderPosition;                       //position of slider pot (0-4096)
+
 //  this struct holds variables for object information such as:
 //  coordinates, life, sprite image, etc..
-struct State{
+typedef struct{
   unsigned short x1;                      // current x1
   unsigned short y1;                      // current y1
   unsigned short x2;                      // current x2
@@ -22,37 +25,34 @@ struct State{
   unsigned short width;                   // width of image BMP
   unsigned short center_x;                // center x coordinate of image
   unsigned short center_y;                // center y coordinate of image
+} State;
 
-};
-typedef struct State State;
 
 //  this struct inherits from the struct State and contains the previous coordinate
 //  to debounce rapid changes in the pot slider
-struct Player {
+typedef struct {
     State state;
     unsigned short px1;                   // previous x1 coordinate
     //unsigned short px2;                 // previous x2 coordinate
-};
-typedef struct Player sPlayer;
+} Player;
+
 
 //  this struct inherits from the struct State and contains the row for asteroids
 //  entering the screen animation
 
-struct Asteroid{
+typedef struct{
     State state;
     unsigned short row;                  // row deploy animation
+} Asteroid;
 
-};
-typedef struct Asteroid sAsteroid;
 
 //  this struct inherits from the struct State and contains the direction of the
 //  laser beam
-struct Laser{
+typedef struct{
     State state;
     unsigned short direction;           // 1 = up; 0 = down
+} Laser;
 
-};
-typedef struct Laser sLaser;
 
 
 
@@ -76,17 +76,23 @@ void moveLaser(void);
 
 
 // helper functions
-void printBMP(struct State *sprite);                    // prints a NxM bitmap
-void printBMP2(struct State *sprite);                   // prints a NxM bitmap with transparent background (must be white)
-void loopGame(void);
-bool collision(struct State *A, struct State *B);       // collision detection using bounding circles algorithm
-unsigned short randomValue(void);                       // random between 0-189 to place asteroid inside LCD resolution of 240
-void getCenter(struct State *sprite);                   // updates the center coordinates of a sprite
+void printBMP(State *sprite);                    // prints a NxM bitmap
+void printBMP2(State *sprite);                   // prints a NxM bitmap with transparent background (must be white)
+bool collision(State *A, State *B);              // collision detection using bounding circles algorithm
+unsigned short randomValue(void);                // random between 0-189 to place asteroid inside LCD resolution of 240
+void getCenter(State *sprite);                   // updates the center coordinates of a sprite
 void Init_StartScreen(void);
+void displayEndScreen(void);                     // function to display score at the end of the game
+void detectPlayerCollision(void);
+void displayCountDown(void);
+
+// function to create sound
+void playSound(void);
 
 // functions to display simple text
-void writeString ( unsigned char word[], unsigned short x, unsigned short y, unsigned short background, unsigned short rgb);
-void writeCharacter ( unsigned char character, unsigned short x, unsigned short y, unsigned short background,unsigned short rgb);
+void writeString (char word[], unsigned short x, unsigned short y, unsigned short background, unsigned short rgb);
+void writeCharacter (unsigned char character, unsigned short x, unsigned short y, unsigned short background,unsigned short rgb);
+
 
 // Interrupt handlers
 void Timer0A_Handler(void);

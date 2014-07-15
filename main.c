@@ -24,7 +24,16 @@ int main(void)
 
 	while(1)
 	{
-	    loopGame();
+	    if (semaphore)                                      // start game after screen has been touched
+	    {
+	        sliderPosition = ADC0();                        // get conversion from slide pot
+	        getPlayerPosition(sliderPosition);              // get previous position of player
+	        playerControl(sliderPosition);                  // move player according to slide pot value
+	        //moveLaser();
+	        deployAsteroid();
+	        moveAsteroid();
+	        detectPlayerCollision();
+	    }
 
 	}
 }

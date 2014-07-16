@@ -11,14 +11,14 @@
 
 
 const unsigned char SineWave[30] = {8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7};        // annoying noise
-unsigned char Index=0;
-
-
+unsigned char Index = 0;
+unsigned char reset = 1;
 unsigned char semaphore;                           //flag to start game after screen has been touched
 unsigned long TimerCount;                          //counter for time travelled
 unsigned int sliderPosition;                       //position of slider pot (0-4096)
 
-char buffer[10];
+
+
 
 Player player;
 State explosion[3];
@@ -38,6 +38,7 @@ void Init_Player(void){
     player.state.image = spaceshipImage;
     player.state.width = SPACESHIPWIDTH;
     player.state.height = SPACESHIPHEIGHT;
+    player.state.life = 1;
 }
 
 // Sets the explosion animations to the correct images
@@ -83,7 +84,7 @@ void Init_StartScreen(void)
     writeCmd(0x0022);
     for(i = 0; i < 76800; i++)
     {
-        writeData(startImage[i]);
+        //writeData(startImage[i]);
     }
 }
 
@@ -92,11 +93,26 @@ void Init_StartScreen(void)
 // Outputs: none
 void displayEndScreen(void){
     Distance_Stop();                                     // stop distance counter
-    int num = TimerCount;
+    Asteroid_Stop();                                     // stop asteroids being generated
+    long num = TimerCount;
+    char buffer[10];
     char words[] = {"TIME TRAVELLED(s): "};
+    char words2[] = {"HIGHSCORE: "};
+
     sprintf(buffer, "%i", num);
     writeString(words, 15, 30, red, white);
     writeString(buffer, 165,30, red, white);
+    writeString(words2, 15, 50, red, white);
+
+/*
+    if(num > highscore){
+        highscore = num;
+    }
+    sprintf(buffer, "%i", highscore);
+
+    writeString(buffer, 165,50, red, white);*/
+
+
 }
 
 
@@ -132,7 +148,7 @@ void printBMP2(State *sprite){
     int row, column;
     row = 0;
     column = 0;
-    //writeCmd(0x0022);
+
     for(i=0;i<sprite->imageLength;i++)
     {
         column++;
@@ -160,8 +176,7 @@ void printBMP2(State *sprite){
 // Inputs: 12 bit ADC sample
 // Outputs: none
 void playerControl(unsigned int slider){
-    int sliderValue= slider*0.0513;             // 12 bit ADC - 220pixels/4096values = ~0.0537
-
+    int sliderValue= slider*0.05;             // 12 bit ADC - 220pixels/4096values = ~0.0537
 
     if (player.state.x1 != player.px1)
     {
@@ -181,7 +196,7 @@ void playerControl(unsigned int slider){
 // Inputs: 12 bit ADC sample
 // Outputs: none
 void getPlayerPosition(unsigned int slider){
-    player.px1 = slider*0.0513;
+    player.px1 = slider*0.05;
 }
 
 // Function to animate an asteroid entering the LCD
@@ -263,6 +278,10 @@ void moveAsteroid(void){
 // Outputs: none
 void deleteAsteroid(unsigned short index){
     asteroid[index].state.life = 0;
+/*    asteroid[index].state.x1 = 300;
+    asteroid[index].state.x2 = asteroid[index].state.x1 + (ASTEROIDWIDTH_M-1);
+    asteroid[index].state.y1 = 350;
+    asteroid[index].state.y2 = 350+M;*/
 }
 
 // Creates new astroid starting at a random x location
@@ -282,12 +301,29 @@ void addAsteroidMedium(unsigned short index){
     asteroid[index].state.width = ASTEROIDWIDTH_M;
 }
 
+// Displays the 3 animations when the player crashes
+// Inputs: Ax, Ay are the center of the image to overlap
+// Outputs: none
+void displayExplosionAnimation(unsigned short Ax, unsigned short Ay){
+    int i;
+    for(i = 0; i < 3; i++)
+    {
+        explosion[i].x1 = Ax - explosion[i].width/2;
+        explosion[i].y1 = Ay - explosion[i].height/2;
+        explosion[i].x2 = explosion[i].x1 + explosion[i].width -1;
+        explosion[i].y2 = explosion[i].y1 + explosion[i].height -1;
+
+        setAddress(explosion[i].x1,explosion[i].y1,explosion[i].x2,explosion[i].y2);
+        printBMP2(&explosion[i]);
+        delayMS(100);
+    }
+}
+
 // Function to detect the collision between two sprites using bounding circles algorithm
 // Inputs: 2 sprite structs
 // Outputs: true if collision detected
 bool collision(State *A, State *B)
 {
-    int i = 0;
     unsigned short Ax,Ay,Bx,By,dx,dy;
     unsigned short radius_A, radius_B, distance;
     getCenter(A);
@@ -304,17 +340,8 @@ bool collision(State *A, State *B)
 
     if(distance < radius_A + radius_B)              // circle detection
     {
-        for(i = 0; i < 3; i++)
-        {
-            explosion[i].x1 = Ax - explosion[i].width/2;
-            explosion[i].y1 = Ay - explosion[i].height/2;
-            explosion[i].x2 = explosion[i].x1 + explosion[i].width -1;
-            explosion[i].y2 = explosion[i].y1 + explosion[i].height -1;
-
-            setAddress(explosion[i].x1,explosion[i].y1,explosion[i].x2,explosion[i].y2);
-            printBMP2(&explosion[i]);
-            delayMS(100);
-        }
+        displayExplosionAnimation(Ax,Ay);
+        A->life = 0;
         return true;
     }
     else
@@ -330,14 +357,40 @@ bool collision(State *A, State *B)
 // If collision between player and asteroid then loop infinately
 // Inputs: none
 // Outputs: none
+/*void detectPlayerCollision(void){
+    int i;
+    for(i=0;i<N; i++)
+    {
+        if(collision(&player.state, &asteroid[i].state)){
+            while(player.state.life == 0){
+                if(reset == 1){
+                    return;
+                }
+                displayEndScreen();
+                displayExplosionAnimation(player.state.center_x,player.state.center_y);
+                playSound();
+
+            }
+        }
+    }
+}*/
+
+
 void detectPlayerCollision(void){
     int i;
     for(i=0;i<N; i++)
     {
-        while(collision(&player.state, &asteroid[i].state)){
-            displayEndScreen();
-            playSound();
+        if(collision(&player.state, &asteroid[i].state)){
+            loopEndGame();
         }
+    }
+}
+
+void loopEndGame(void){
+    displayEndScreen();
+    while(player.state.life == 0){
+        displayExplosionAnimation(player.state.center_x,player.state.center_y);
+        playSound();
     }
 }
 
@@ -411,6 +464,27 @@ void playSound(void){
     note ^= 1;
 }
 
+// Displays strings: 3, 2, 1, START
+// Inputs: none
+// Outputs: none
+void displayCountDown(void){
+    int i;
+    char *word[] = {"3", "2", "1","START!"};
+    clearLCD(white);
+    for(i = 0; i < 4; i++)
+    {
+        if(i == 3){
+            writeString(word[i], 100, 160, red, white);
+            delayMS(1000);
+            clearArea(90,150,190,250,white);
+        }
+        else{
+        writeString(word[i], 120, 160, red, white);
+        delayMS(1000);
+        }
+    }
+}
+
 // Generates a random value between 0 and 189
 // screen width: 240 pixels
 // asteroid width: 50 pixels
@@ -418,7 +492,6 @@ void playSound(void){
 // Outputs: random value (0-189)
 unsigned short randomValue(void){
     char i;
-
     srand(ADC0());
     i = rand();
     while(i > 189){
@@ -486,36 +559,17 @@ void GPIOPortA_Handler(void){
 
 }
 
-// Displays strings: 3, 2, 1, START
-// Inputs: none
-// Outputs: none
-void displayCountDown(void){
-    int i;
-    char *word[] = {"3", "2", "1","START!"};
-    clearLCD(white);
-    for(i = 0; i < 4; i++)
-    {
-        if(i == 3){
-            writeString(word[i], 100, 160, red, white);
-            delayMS(1000);
-            clearArea(90,150,190,250,white);
-        }
-        else{
-        writeString(word[i], 120, 160, red, white);
-        delayMS(1000);
-        }
-    }
-}
 // Touchscreen interrupt for starting game
 // Priority level 5
 // Inputs: none
 // Outputs: none
-void GPIOPortE_Handler(void){
-    displayCountDown();
+void Touchscreen_Handler(void){
+    //displayCountDown();
     GPIO_PORTE_ICR_R = 0x08;    // clear interrupt flag
+    reset = 1;
     semaphore = 1;
-    Asteroid_Start();
-    Distance_Start();
+    player.state.life = 1;
+
 }
 
 // Initiates an asteroid onto the screen
@@ -523,7 +577,7 @@ void GPIOPortE_Handler(void){
 // Inputs: none
 // Outputs: none
 void Asteroid_Handler(void){
-  char i;
+  int i;
   TIMER0_ICR_R = 0x00000001;  // clear interrupt flag
   for(i = 0; i < N; i++)
   {
@@ -540,7 +594,6 @@ void Asteroid_Handler(void){
 // Inputs: none
 // Outputs: none
 void Distance_Handler(void){
-
   TIMER1_ICR_R = 0x00000001;  // clear interrupt flag
   TimerCount++;
 }
@@ -549,13 +602,31 @@ void Distance_Handler(void){
 // Inputs: none
 // Outputs: none
 void Sound_Handler(void){
-  TIMER2_ICR_R = 0x00000001;  // clear interrupt flag
-  //DAC_Out(SineWave[Index]);    // output one value each interrupt
+  TIMER2_ICR_R = 0x00000001;     // clear interrupt flag
   if(Index >= 30){
       Index = 0;
   }
-  Index = (Index+1)&0xFF;      // 8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7
-
-  DAC = SineWave[Index] << 4;
+  Index = (Index+1)&0xFF;       // 8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7
+  DAC = SineWave[Index] << 4;   // output one value each interrupt
 }
 
+void resetGame(void){
+    //int i;
+    TimerCount = 0;
+    Index = 0;
+
+/*    player.state.x1 = 110;
+    player.state.y1 = 250;
+    player.state.x2 = player.state.x1 + SPACESHIPWIDTH -1;
+    player.state.y2 = player.state.y1 + SPACESHIPHEIGHT -1;*/
+
+
+    /*for(i = 0;i < N;i++){
+        deleteAsteroid(i);
+        asteroid[i].state.x1 = 0;
+        //Asteroid[index].state.x1 = sliderPosition*0.0513 - (ASTEROIDWIDTH_M - SPACESHIPWIDTH);
+        asteroid[i].state.x2 = asteroid[i].state.x1 + (ASTEROIDWIDTH_M-1);
+        asteroid[i].state.y1 = 0;
+        asteroid[i].state.y2 = M;
+    }*/
+}

@@ -365,7 +365,7 @@ unsigned int getY(void){
 // Busy-wait analog to digital conversion
 // Inputs: none
 // Outputs: 12-bit result of ADC conversion
-unsigned long ADC0(){
+unsigned long ADC0(void){
   unsigned long result;
   ADC0_PSSI_R = 0x0008;                // 1) initiate SS3
   while((ADC0_RIS_R&0x08)==0){};       // 2) wait for conversion done

@@ -8,8 +8,9 @@
 #define LASERS 3
 #define LASERSPEED 1
 
-extern unsigned char semaphore;          //flag to start game after screen has been touched
+extern unsigned char semaphore;                           //flag to start game after screen has been touched
 extern unsigned int sliderPosition;                       //position of slider pot (0-4096)
+extern unsigned char reset;
 
 //  this struct holds variables for object information such as:
 //  coordinates, life, sprite image, etc..
@@ -20,7 +21,7 @@ typedef struct{
   unsigned short y2;                      // current y2
   const unsigned short *image;            // ptr->image
   unsigned short imageLength;             // image length
-  unsigned char life;                     // 0 = dead
+  unsigned short life;                     // 0 = dead
   unsigned short height;                  // height of image BMP
   unsigned short width;                   // width of image BMP
   unsigned short center_x;                // center x coordinate of image
@@ -85,6 +86,9 @@ void Init_StartScreen(void);
 void displayEndScreen(void);                     // function to display score at the end of the game
 void detectPlayerCollision(void);
 void displayCountDown(void);
+void resetGame(void);
+void displayExplosionAnimation(unsigned short x, unsigned short y);
+void loopEndGame(void);
 
 // function to create sound
 void playSound(void);
@@ -99,7 +103,7 @@ void Asteroid_Handler(void);
 void Distance_Handler(void);
 void Sound_Handler(void);
 void GPIOPortA_Handler(void);
-void GPIOPortE_Handler(void);
+void Touchscreen_Handler(void);
 
 
 

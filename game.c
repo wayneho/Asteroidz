@@ -11,12 +11,12 @@
 
 
 const unsigned char SineWave[30] = {8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7};        // annoying noise
-unsigned char Index = 0;
+unsigned char Index;
 unsigned char reset = 1;
 unsigned char semaphore;                           //flag to start game after screen has been touched
 unsigned long TimerCount;                          //counter for time travelled
 unsigned int sliderPosition;                       //position of slider pot (0-4096)
-
+static long highscore;
 
 
 
@@ -104,13 +104,12 @@ void displayEndScreen(void){
     writeString(buffer, 165,30, red, white);
     writeString(words2, 15, 50, red, white);
 
-/*
     if(num > highscore){
         highscore = num;
     }
     sprintf(buffer, "%i", highscore);
 
-    writeString(buffer, 165,50, red, white);*/
+    writeString(buffer, 165,50, red, white);
 
 
 }
@@ -611,22 +610,15 @@ void Sound_Handler(void){
 }
 
 void resetGame(void){
-    //int i;
+    int i;
     TimerCount = 0;
     Index = 0;
 
-/*    player.state.x1 = 110;
-    player.state.y1 = 250;
-    player.state.x2 = player.state.x1 + SPACESHIPWIDTH -1;
-    player.state.y2 = player.state.y1 + SPACESHIPHEIGHT -1;*/
-
-
-    /*for(i = 0;i < N;i++){
+    for(i = 0;i < N;i++){
         deleteAsteroid(i);
         asteroid[i].state.x1 = 0;
-        //Asteroid[index].state.x1 = sliderPosition*0.0513 - (ASTEROIDWIDTH_M - SPACESHIPWIDTH);
         asteroid[i].state.x2 = asteroid[i].state.x1 + (ASTEROIDWIDTH_M-1);
-        asteroid[i].state.y1 = 0;
+        asteroid[i].state.y1 = 330;
         asteroid[i].state.y2 = M;
-    }*/
+    }
 }

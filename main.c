@@ -31,7 +31,6 @@ int main(void)
 	            delayMS(200);                               // delay needed for touchscreen interrupt to settle
 	            reset = 0;
 	            resetGame();
-
 	            displayCountDown();
 	            Asteroid_Start();
 	            Distance_Start();

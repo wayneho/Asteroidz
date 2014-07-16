@@ -16,8 +16,6 @@ unsigned char reset = 1;
 unsigned char semaphore;                           //flag to start game after screen has been touched
 unsigned long TimerCount;                          //counter for time travelled
 unsigned int sliderPosition;                       //position of slider pot (0-4096)
-static long highscore;
-
 
 
 Player player;
@@ -92,9 +90,14 @@ void Init_StartScreen(void)
 // Inputs: none
 // Outputs: none
 void displayEndScreen(void){
+    long highscore;
+    unsigned long num;
+
     Distance_Stop();                                     // stop distance counter
     Asteroid_Stop();                                     // stop asteroids being generated
-    long num = TimerCount;
+    num = TimerCount;
+    highscore = read_highscore();
+
     char buffer[10];
     char words[] = {"TIME TRAVELLED(s): "};
     char words2[] = {"HIGHSCORE: "};
@@ -105,14 +108,22 @@ void displayEndScreen(void){
     writeString(words2, 15, 50, red, white);
 
     if(num > highscore){
+        write_highscore(num);
         highscore = num;
     }
     sprintf(buffer, "%i", highscore);
-
     writeString(buffer, 165,50, red, white);
 
 
 }
+void write_highscore(unsigned long score){
+    write_sector(0x2,0x0,&score);                   // sector 1, offset 0
+}
+
+unsigned long read_highscore(void){
+    return read_sector(0x2,0x0);                   // sector 1, offset 0
+}
+
 
 
 // Updates center coordinate of a sprite
@@ -541,19 +552,21 @@ void writeCharacter (unsigned char c, unsigned short x, unsigned short y, unsign
 // Inputs: none
 // Outputs: none
 void GPIOPortA_Handler(void){
-    int i;
+    //int i;
     GPIO_PORTA_ICR_R = 0x80;    // clear interrupt flag
     delayMS(5);                // debounce switch
     if(SW0 == 0)
     {
-        for(i = 0; i < 10; i++)
+/*        for(i = 0; i < 10; i++)
         {
             if(laser[i].state.life == 0)
             {
                 addLaser(i);
                 return;
             }
-        }
+        }*/
+
+        erase_sector(0x2,0x0);              // reset highscore
     }
 
 }

@@ -8,12 +8,26 @@
 int main(void)
 
 {
+    int EEPROM_Status;
+
     // system setup
 	Init_PLL();
 	Init_Port();
 	Init_LCD();
 	Init_Interrupt();
 	Init_Analog();
+
+
+	retry:
+	EEPROM_Status = Init_EEPROM();
+	switch(EEPROM_Status){
+	case 0:                                 // no errors
+	    break;
+	case 1:
+	    goto retry;                         //retry
+	default:
+	    while(1){};                         // error enter infinite loop
+	}
 
 	// game setup
 	clearLCD(white);

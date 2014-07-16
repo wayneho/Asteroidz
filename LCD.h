@@ -13,6 +13,10 @@
 #define cyan           0x7FFF
 #define yellow         0xFFE0
 
+#define INIT_EEPROM_GOOD    0
+#define INIT_EEPROM_RETRY   1
+#define INIT_EEPROM_ERROR   2
+
 
 
 // initialization functions
@@ -21,6 +25,7 @@ void Init_Port(void);       //setup GPIO pins
 void Init_LCD(void);        //base LCD config
 void Init_SSI0(void);       //setup SSI0
 void Init_Analog(void);
+unsigned long Init_EEPROM(void);
 
 // functions to send cmd/data to LCD
 void writeCmd(unsigned short cmd);
@@ -31,7 +36,7 @@ void writeReg(unsigned short cmd,unsigned short data);
 void clearLCD(unsigned short rgb);                                                                                  //set entire LCD to the color rgb
 void clearArea(unsigned short x1, unsigned short y1,unsigned short x2,unsigned short y2, unsigned short color);     // erase an area on the LCD
 void setCursor(unsigned short x,unsigned short y);                                                                  //set current pixel to x,y
-void setAddress(unsigned int x1,unsigned int y1,unsigned int x2,unsigned int y2);                                   // set an address range
+void setAddress(unsigned short x1,unsigned short y1,unsigned short x2,unsigned short y2);                                   // set an address range
 void delayMS(unsigned long ms);                                                                                     // delay in ms using system clock
 
 // functions for time delay using SysTick
@@ -39,11 +44,16 @@ void Init_SysTick(void);
 void Wait_SysTick(unsigned long delay);
 
 // touchscreen functions
-unsigned int getX(void);
-unsigned int getY(void);
+unsigned long getX(void);
+unsigned long getY(void);
 
 // function to get ADC sample
 unsigned long ADC0(void);
 
+//function to use EEPROM
+void check_eeprom_done(void);
+void write_sector(unsigned char sector, unsigned char offset, unsigned long *data);
+unsigned long read_sector(unsigned char sector, unsigned char offset);
+void erase_sector(unsigned char sector, unsigned char offset);
 
 #endif

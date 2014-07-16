@@ -288,7 +288,7 @@ void setCursor(unsigned short x,unsigned short y)
 // Sets the address window in the GDDRAM
 // Inputs: x1,y1,x2,y2 coordinates
 // Outputs: none
-void setAddress(unsigned int x1,unsigned int y1,unsigned int x2,unsigned int y2)
+void setAddress(unsigned short x1,unsigned short y1,unsigned short x2,unsigned short y2)
 {
     writeReg(0x0044,(x2<<8)+x1);
     writeReg(0x0045,y1);
@@ -330,7 +330,7 @@ void clearArea(unsigned short x1, unsigned short y1,unsigned short x2,unsigned s
 // Requests the x coordinate from the touchscreen controller
 // Inputs: none
 // Outputs: 12-bit conversion
-unsigned int getX(void){
+unsigned long getX(void){
 	unsigned int coordinate = 0;
 	//TS_CS	 = 0x00;										// set touchscreen chip select
 	SSI0_DR_R =  0xD0;										// send control byte (differential mode, 12bit conversion)
@@ -347,7 +347,7 @@ unsigned int getX(void){
 // Requests the y coordinate from the touchscreen controller
 // Inputs: none
 // Outputs: 12-bit ADC conversion
-unsigned int getY(void){
+unsigned long getY(void){
 	unsigned int coordinate = 0;
 	//TS_CS	 = 0x00;											// set touchscreen chip select
 	SSI0_DR_R =  0x90;											// send control byte (differential mode, 12bit conversion)
@@ -376,7 +376,64 @@ unsigned long ADC0(void){
 
 
 
+unsigned long Init_EEPROM(void){
+    volatile unsigned long delay;
+    unsigned long status;
+    SYSCTL_RCGCEEPROM_R |= 0x1;        // enable EEPROM clock
+    delay = SYSCTL_RCGC2_R;            // allow time for clock to start
 
+    check_eeprom_done();               // wait for WORKING bit in EEDONE to clear before accessing any EEPROM registers
+
+    status = EEPROM_EESUPP_R;
+
+    if(status & (EEPROM_EESUPP_PRETRY | EEPROM_EESUPP_ERETRY)){             // check for errors
+        EEPROM_EESUPP_R = EEPROM_EESUPP_START;                              // reset EEPROM
+        check_eeprom_done();                                                // wait for EEPROM to finish resetting
+
+        status = EEPROM_EESUPP_R;                                           // read status register again
+        if(status & (EEPROM_EESUPP_PRETRY | EEPROM_EESUPP_ERETRY)){
+            return(INIT_EEPROM_ERROR);
+        }
+        else{
+            return(INIT_EEPROM_RETRY);
+        }
+    }
+
+    EEPROM_EEBLOCK_R = 0x2;             // select block 1
+    EEPROM_EEOFFSET_R = 0x0;            // select offset 0
+    EEPROM_EEPROT_R &= ~0x0F;           // allow write and read
+    return(INIT_EEPROM_GOOD);
+
+}
+
+void check_eeprom_done(void){
+    while(EEPROM_EEDONE_R == 0x1){};            // poll EEDONE register
+}
+
+void write_sector(unsigned char sector, unsigned char offset, unsigned long *data){
+    check_eeprom_done();                // check if EEPROM is idle first
+    EEPROM_EEBLOCK_R = sector;          // select block 1
+    EEPROM_EEOFFSET_R = offset;         // select offset 0
+    EEPROM_EERDWR_R = *data;            // write highscore to EEPROM
+    check_eeprom_done();                // check if EEPROM is done writing
+
+}
+
+unsigned long read_sector(unsigned char sector, unsigned char offset){
+    check_eeprom_done();                // check if EEPROM is idle first
+    EEPROM_EEBLOCK_R = sector;          // select block 1
+    EEPROM_EEOFFSET_R = offset;         // select offset 0
+    check_eeprom_done();                // check if EEPROM is done reading
+    return EEPROM_EERDWR_R;             // read highscore from EEPROM
+}
+
+void erase_sector(unsigned char sector, unsigned char offset){
+    check_eeprom_done();                // check if EEPROM is idle first
+    EEPROM_EEBLOCK_R = sector;          // select block 1
+    EEPROM_EEOFFSET_R = offset;         // select offset 0
+    EEPROM_EERDWR_R = 0;                // write highscore to EEPROM
+    check_eeprom_done();                // check if EEPROM is done writing
+}
 
 
 

@@ -89,6 +89,8 @@ void displayCountDown(void);
 void resetGame(void);
 void displayExplosionAnimation(unsigned short x, unsigned short y);
 void loopEndGame(void);
+void write_highscore(unsigned long score);
+unsigned long read_highscore(void);
 
 // function to create sound
 void playSound(void);

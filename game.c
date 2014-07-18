@@ -87,7 +87,7 @@ void Init_StartScreen(void)
     writeCmd(0x0022);
     for(i = 0; i < 76800; i++)
     {
-        palette_index = startImage[i];
+        //palette_index = startImage[i];
         //writeData(startImagePalette[palette_index]);
     }
 }

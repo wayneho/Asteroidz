@@ -3,10 +3,12 @@
 
 #include "stdbool.h"
 
-#define N  2                // number of asteroids on the screen at a time (too many will cause lag)
-#define M 3                 // speed at which asteroids travel
-#define LASERS 3
-#define LASERSPEED 1
+#define N               2                 // number of asteroids on the screen at a time (too many will cause lag)
+#define M               3                 // speed at which asteroids travel
+#define LASERS          3
+#define LASERSPEED      1
+#define FB_BASE         0x00020000        // frame buffer located at address 0x00020000 - 0x00032BFF
+#define FB_SIZE         76800
 
 extern unsigned char start;                               //flag to start game after screen has been touched
 extern unsigned int sliderPosition;                       //position of slider pot (0-4096)

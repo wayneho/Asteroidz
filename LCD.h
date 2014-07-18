@@ -50,10 +50,17 @@ unsigned long getY(void);
 // function to get ADC sample
 unsigned long ADC0(void);
 
-//function to use EEPROM
+//EEPROM functions
 void check_eeprom_done(void);
 void write_sector(unsigned char sector, unsigned char offset, unsigned long *data);
 unsigned long read_sector(unsigned char sector, unsigned char offset);
 void erase_sector(unsigned char sector, unsigned char offset);
+
+//Flash memory functions
+void check_flash_done(void);
+void write_flash(unsigned long *data, unsigned long address);
+void write_flash_buffer(unsigned long *data,unsigned long address, unsigned char offset);
+unsigned long read_flash(unsigned long address);
+void mass_erase_flash(void);
 
 #endif

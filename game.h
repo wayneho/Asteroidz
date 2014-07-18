@@ -8,7 +8,7 @@
 #define LASERS 3
 #define LASERSPEED 1
 
-extern unsigned char semaphore;                           //flag to start game after screen has been touched
+extern unsigned char start;                               //flag to start game after screen has been touched
 extern unsigned int sliderPosition;                       //position of slider pot (0-4096)
 extern unsigned char reset;
 
@@ -19,9 +19,11 @@ typedef struct{
   unsigned short y1;                      // current y1
   unsigned short x2;                      // current x2
   unsigned short y2;                      // current y2
-  const unsigned short *image;            // ptr->image
-  unsigned short imageLength;             // image length
-  unsigned short life;                     // 0 = dead
+  const unsigned short *palette;
+  unsigned short paletteSize;
+  const unsigned char *image;             // ptr->image
+  unsigned short imageSize;               // image size
+  unsigned short life;                    // 0 = dead
   unsigned short height;                  // height of image BMP
   unsigned short width;                   // width of image BMP
   unsigned short center_x;                // center x coordinate of image
@@ -55,7 +57,8 @@ typedef struct{
 } Laser;
 
 
-
+extern Asteroid asteroid[];
+extern State explosion[];
 
 // player functions
 void Init_Player(void);
@@ -79,6 +82,7 @@ void moveLaser(void);
 // helper functions
 void printBMP(State *sprite);                    // prints a NxM bitmap
 void printBMP2(State *sprite);                   // prints a NxM bitmap with transparent background (must be white)
+void printBMP3(State *sprite);
 bool collision(State *A, State *B);              // collision detection using bounding circles algorithm
 unsigned short randomValue(void);                // random between 0-189 to place asteroid inside LCD resolution of 240
 void getCenter(State *sprite);                   // updates the center coordinates of a sprite

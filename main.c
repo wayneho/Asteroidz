@@ -24,7 +24,7 @@ int main(void)
 	case 0:                                 // no errors
 	    break;
 	case 1:
-	    goto retry;                         //retry
+	    goto retry;                         //retry initilization
 	default:
 	    while(1){};                         // error enter infinite loop
 	}
@@ -39,7 +39,8 @@ int main(void)
 
 	while(1)
 	{
-	    if (semaphore)                                      // start game after screen has been touched
+
+	    if (start)                                          // start game after screen has been touched
 	    {
 	        if(reset == 1){
 	            delayMS(200);                               // delay needed for touchscreen interrupt to settle
@@ -60,6 +61,7 @@ int main(void)
                 detectPlayerCollision();
 	        }
 	    }
+
 
 	}
 }

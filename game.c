@@ -13,7 +13,7 @@
 const unsigned char SineWave[30] = {8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7};        // annoying noise
 unsigned char Index;
 unsigned char reset = 1;
-unsigned char semaphore;                           //flag to start game after screen has been touched
+unsigned char start;                               //flag to start game after screen has been touched
 unsigned long TimerCount;                          //counter for time travelled
 unsigned int sliderPosition;                       //position of slider pot (0-4096)
 
@@ -32,7 +32,8 @@ void Init_Player(void){
     player.state.y1 = 250;
     player.state.x2 = player.state.x1 + SPACESHIPWIDTH -1;
     player.state.y2 = player.state.y1 + SPACESHIPHEIGHT -1;
-    player.state.imageLength = SPACESHIPBMP;
+    player.state.palette = spaceshipPalette;
+    player.state.imageSize = SPACESHIPBMP;
     player.state.image = spaceshipImage;
     player.state.width = SPACESHIPWIDTH;
     player.state.height = SPACESHIPHEIGHT;
@@ -47,7 +48,8 @@ void Init_Explosions(void){
     explosion[0].y1 = 0;
     explosion[0].x2 = explosion[0].x1 + EXPLOSION1_WIDTH -1;
     explosion[0].y2 = explosion[0].y1 + EXPLOSION1_HEIGHT -1;
-    explosion[0].imageLength = EXPLOSION1_BMP;
+    explosion[0].palette = explosion1Palette;
+    explosion[0].imageSize = EXPLOSION1_BMP;
     explosion[0].image = explosionImage1;
     explosion[0].width = EXPLOSION1_WIDTH;
     explosion[0].height = EXPLOSION1_HEIGHT;
@@ -56,7 +58,8 @@ void Init_Explosions(void){
     explosion[1].y1 = 0;
     explosion[1].x2 = explosion[1].x1 + EXPLOSION2_WIDTH -1;
     explosion[1].y2 = explosion[1].y1 + EXPLOSION2_HEIGHT -1;
-    explosion[1].imageLength = EXPLOSION2_BMP;
+    explosion[1].palette = explosion2Palette;
+    explosion[1].imageSize = EXPLOSION2_BMP;
     explosion[1].image = explosionImage2;
     explosion[1].width = EXPLOSION2_WIDTH;
     explosion[1].height = EXPLOSION2_HEIGHT;
@@ -65,7 +68,8 @@ void Init_Explosions(void){
     explosion[2].y1 = 0;
     explosion[2].x2 = explosion[2].x1 + EXPLOSION3_WIDTH -1;
     explosion[2].y2 = explosion[2].y1 + EXPLOSION3_HEIGHT -1;
-    explosion[2].imageLength = EXPLOSION3_BMP;
+    explosion[2].palette = explosion3Palette;
+    explosion[2].imageSize = EXPLOSION3_BMP;
     explosion[2].image = explosionImage3;
     explosion[2].width = EXPLOSION3_WIDTH;
     explosion[2].height = EXPLOSION3_HEIGHT;
@@ -78,11 +82,13 @@ void Init_Explosions(void){
 void Init_StartScreen(void)
 {
     int i ;
+    int palette_index;
     setAddress(0,0,239,319);
     writeCmd(0x0022);
     for(i = 0; i < 76800; i++)
     {
-        //writeData(startImage[i]);
+        palette_index = startImage[i];
+        //writeData(startImagePalette[palette_index]);
     }
 }
 
@@ -135,6 +141,17 @@ void getCenter(State *sprite)
     sprite->center_y = (sprite->y2 - sprite->y1)/2 + sprite->y1;       // get center y coordinate
 }
 
+void printBMP3(State *sprite){
+    int i;
+    int palette_index;
+    writeCmd(0x0022);
+    for(i=0;i<sprite->imageSize;i++)
+    {
+        palette_index = sprite->image[i];
+        writeData(sprite->palette[palette_index]);
+    }
+}
+
 
 // Prints the image of a sprite
 // Inputs: Sprite
@@ -142,7 +159,7 @@ void getCenter(State *sprite)
 void printBMP(State *sprite){
     int i;
     writeCmd(0x0022);
-    for(i=0;i<sprite->imageLength;i++)
+    for(i=0;i<sprite->imageSize;i++)
     {
         writeData(sprite->image[i]);
     }
@@ -155,28 +172,33 @@ void printBMP(State *sprite){
 // Outputs: none
 void printBMP2(State *sprite){
     int i;
+    int palette_index;
     int row, column;
     row = 0;
     column = 0;
 
-    for(i=0;i<sprite->imageLength;i++)
+    for(i=0;i<sprite->imageSize;i++)
     {
-        column++;
-        if(sprite->image[i] != 0xFFFF)                          // skip drawing if color is 0xFFFF;
+        column++;                                               // column holds next x address
+        if(sprite->image[i] != 0)                               // skip drawing if color is 0;
         {
             writeCmd(0x0022);
-            writeData(sprite->image[i]);
+            //writeData(sprite->image[i]);
+            palette_index = sprite->image[i];
+            writeData(sprite->palette[palette_index]);
         }
         else
         {
             setCursor(sprite->x1+column, sprite->y1+row);       // manually move the address counter to next location
         }
 
-        if(column == sprite->width )                            // if x address reaches the last pixel increment to next row
+        if(column == sprite->width )                            // if x address reaches the last pixel increment to next row and reset column
         {
             row++;
             column = 0;
+            setCursor(sprite->x1+column, sprite->y1+row);
         }
+
     }
 }
 
@@ -196,7 +218,7 @@ void playerControl(unsigned int slider){
             player.state.x1 = sliderValue;
             player.state.x2 = sliderValue + (player.state.width -1);
             setAddress(player.state.x1,player.state.y1,player.state.x2,player.state.y2);
-            printBMP(&player.state);
+            printBMP3(&player.state);
         }
     }
 }
@@ -210,11 +232,13 @@ void getPlayerPosition(unsigned int slider){
 }
 
 // Function to animate an asteroid entering the LCD
+// Draws an asteroid bitmap 'M' rows at a time depending on asteroid speed
 // Inputs: none
 // Outputs: none
 void deployAsteroid(void){
     char i;
     int j;
+    int palette_index;
     unsigned short x_start, x_end,y_start, y_end, row;
 
 
@@ -228,15 +252,17 @@ void deployAsteroid(void){
             y_end = asteroid[i].state.y2;
             row = asteroid[i].row;
 
-            if(y_end < asteroid[i].state.height)        // if astroid has not fully entered screen
+            if(y_end < asteroid[i].state.height)                    // if astroid has not fully entered screen
             {
                 setAddress(x_start, y_start, x_end, y_end);
                 writeCmd(0x0022);
-                row = row - M;
+                row = row - M;                                      // increment number of bottom rows to draw depending on speed of asteroid
                 asteroid[i].row = row;
-                for(j = asteroid[i].state.width*(row); j < (asteroid[i].state.width*asteroid[i].state.height)-1; j++)      // draw row
+                for(j = asteroid[i].state.width*(row); j < (asteroid[i].state.width*asteroid[i].state.height)-1; j++)      // draw bottom row(s) as asteroid enters screen from above
                 {
-                    writeData(asteroid[i].state.image[j]);
+                    //writeData(asteroid[i].state.image[j]);
+                    palette_index = asteroid[i].state.image[j];
+                    writeData(asteroid[i].state.palette[palette_index]);
                 }
                 y_end = y_end + M;
                 asteroid[i].state.y2 = y_end;
@@ -275,7 +301,7 @@ void moveAsteroid(void){
                     asteroid[i].state.y2 = asteroid[i].state.y2 + M;
                     clearArea(asteroid[i].state.x1, asteroid[i].state.y1-M, asteroid[i].state.x2 , asteroid[i].state.y1+1, white);
                     setAddress(asteroid[i].state.x1,asteroid[i].state.y1,asteroid[i].state.x2,asteroid[i].state.y2);
-                    printBMP(&asteroid[i].state);
+                    printBMP3(&asteroid[i].state);
 
                 }
             }
@@ -305,11 +331,15 @@ void addAsteroidMedium(unsigned short index){
     asteroid[index].state.y2 = M;
     asteroid[index].state.life = 1;
     asteroid[index].row = ASTEROIDHEIGHT_M;
-    asteroid[index].state.imageLength = ASTEROIDBMP_M;
+    asteroid[index].state.palette = asteroidPalette;
+    asteroid[index].state.paletteSize = ASTEROID_PALETTE_SIZE;
+    asteroid[index].state.imageSize = ASTEROIDBMP_M;
     asteroid[index].state.image = asteroidm;
     asteroid[index].state.height = ASTEROIDHEIGHT_M;
     asteroid[index].state.width = ASTEROIDWIDTH_M;
 }
+
+
 
 // Displays the 3 animations when the player crashes
 // Inputs: Ax, Ay are the center of the image to overlap
@@ -348,7 +378,7 @@ bool collision(State *A, State *B)
     dy = abs(Ay - By);
     distance = sqrt(dx*dx + dy*dy);
 
-    if(distance < radius_A + radius_B)              // circle detection
+    if(distance < 0.8*radius_A + radius_B)              // circle detection
     {
         displayExplosionAnimation(Ax,Ay);
         A->life = 0;
@@ -363,27 +393,6 @@ bool collision(State *A, State *B)
     //return((dx*2 < (A->width + B->width)) && (dy*2 < (A->height+B->height)));        // box detection algorithm
 
 }
-
-// If collision between player and asteroid then loop infinately
-// Inputs: none
-// Outputs: none
-/*void detectPlayerCollision(void){
-    int i;
-    for(i=0;i<N; i++)
-    {
-        if(collision(&player.state, &asteroid[i].state)){
-            while(player.state.life == 0){
-                if(reset == 1){
-                    return;
-                }
-                displayEndScreen();
-                displayExplosionAnimation(player.state.center_x,player.state.center_y);
-                playSound();
-
-            }
-        }
-    }
-}*/
 
 
 void detectPlayerCollision(void){
@@ -416,8 +425,8 @@ void addLaser(unsigned short index)
     laser[index].state.y2 = player.state.y1 -2;
     laser[index].state.life = 1;
     laser[index].direction = 1;
-    laser[index].state.imageLength = LASERBEAM_BMP;
-    laser[index].state.image = laserbeam;
+    laser[index].state.imageSize = LASERBEAM_BMP;
+    //laser[index].state.image = laserbeam;
     laser[index].state.height = LASERBEAM__HEIGHT;
     laser[index].state.width = LASERBEAM__WIDTH;
     setAddress(laser[index].state.x1, laser[index].state.y1,laser[index].state.x2,laser[index].state.y2);
@@ -579,7 +588,7 @@ void Touchscreen_Handler(void){
     //displayCountDown();
     GPIO_PORTE_ICR_R = 0x08;    // clear interrupt flag
     reset = 1;
-    semaphore = 1;
+    start = 1;
     player.state.life = 1;
 
 }

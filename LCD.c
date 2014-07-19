@@ -445,13 +445,7 @@ void write_flash(unsigned long *data, unsigned long address){
     FLASH_FMC_R = FLASH_FMC_WRKEY + FLASH_FMC_WRITE;
     while(FLASH_FMC_R&FLASH_FMC_WRITE == 0x1){};
 }
-/*void write_flash_buffer(unsigned long *data,unsigned long address){
-    FLASH_FWBN_R = *data;
-    //FLASH_FWB1_R = *data;
-    FLASH_FMA_R = address&0x3FFFF;                                      // 18bit address
-    FLASH_FMC2_R = FLASH_FMC_WRKEY + FLASH_FMC2_WRBUF;                  // write flash memory write key and WRBUF bit
-    while(FLASH_FMC2_R&FLASH_FMC2_WRBUF == 0x1){};                      // wait for WRBUF bit to clear
-}*/
+
 void write_flash_buffer(unsigned long *data,unsigned long address, unsigned char offset){
     volatile unsigned long *reg = ((volatile unsigned long *)0x400FD100);
     reg[offset] = *data;

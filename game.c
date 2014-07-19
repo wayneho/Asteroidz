@@ -19,7 +19,7 @@ unsigned int sliderPosition;                       //position of slider pot (0-4
 
 
 Player player;
-State explosion[3];
+State explosion[4];
 Asteroid asteroid[N];
 Laser laser[LASERS];
 
@@ -32,7 +32,6 @@ void Init_Player(void){
     player.state.y1 = 250;
     player.state.x2 = player.state.x1 + SPACESHIPWIDTH -1;
     player.state.y2 = player.state.y1 + SPACESHIPHEIGHT -1;
-    player.state.palette = spaceshipPalette;
     player.state.imageSize = SPACESHIPBMP;
     player.state.image = spaceshipImage;
     player.state.width = SPACESHIPWIDTH;
@@ -44,35 +43,21 @@ void Init_Player(void){
 // Inputs: none
 // Outputs: none
 void Init_Explosions(void){
-    explosion[0].x1 = 0;
-    explosion[0].y1 = 0;
-    explosion[0].x2 = explosion[0].x1 + EXPLOSION1_WIDTH -1;
-    explosion[0].y2 = explosion[0].y1 + EXPLOSION1_HEIGHT -1;
-    explosion[0].palette = explosion1Palette;
-    explosion[0].imageSize = EXPLOSION1_BMP;
-    explosion[0].image = explosionImage1;
-    explosion[0].width = EXPLOSION1_WIDTH;
-    explosion[0].height = EXPLOSION1_HEIGHT;
+    int i;
 
-    explosion[1].x1 = 0;
-    explosion[1].y1 = 0;
-    explosion[1].x2 = explosion[1].x1 + EXPLOSION2_WIDTH -1;
-    explosion[1].y2 = explosion[1].y1 + EXPLOSION2_HEIGHT -1;
-    explosion[1].palette = explosion2Palette;
-    explosion[1].imageSize = EXPLOSION2_BMP;
-    explosion[1].image = explosionImage2;
-    explosion[1].width = EXPLOSION2_WIDTH;
-    explosion[1].height = EXPLOSION2_HEIGHT;
-
-    explosion[2].x1 = 0;
-    explosion[2].y1 = 0;
-    explosion[2].x2 = explosion[2].x1 + EXPLOSION3_WIDTH -1;
-    explosion[2].y2 = explosion[2].y1 + EXPLOSION3_HEIGHT -1;
-    explosion[2].palette = explosion3Palette;
-    explosion[2].imageSize = EXPLOSION3_BMP;
-    explosion[2].image = explosionImage3;
-    explosion[2].width = EXPLOSION3_WIDTH;
-    explosion[2].height = EXPLOSION3_HEIGHT;
+    for(i=0;i<4;i++){
+        explosion[i].x1 = 0;
+        explosion[i].y1 = 0;
+        explosion[i].x2 = explosion[i].x1 + EXPLOSION_WIDTH -1;
+        explosion[i].y2 = explosion[i].y1 + EXPLOSION_HEIGHT -1;
+        explosion[i].imageSize = EXPLOSION_BMP;
+        explosion[i].width = EXPLOSION_WIDTH;
+        explosion[i].height = EXPLOSION_HEIGHT;
+    }
+    explosion[0].image = explosionImage0;
+    explosion[1].image = explosionImage1;
+    explosion[2].image = explosionImage2;
+    explosion[3].image = explosionImage3;
 }
 
 
@@ -87,8 +72,8 @@ void Init_StartScreen(void)
     writeCmd(0x0022);
     for(i = 0; i < 76800; i++)
     {
-        //palette_index = startImage[i];
-        //writeData(startImagePalette[palette_index]);
+        palette_index = startImage[i];
+        writeData(colorPalette[palette_index]);
     }
 }
 
@@ -148,7 +133,7 @@ void printBMP3(State *sprite){
     for(i=0;i<sprite->imageSize;i++)
     {
         palette_index = sprite->image[i];
-        writeData(sprite->palette[palette_index]);
+        writeData(colorPalette[palette_index]);
     }
 }
 
@@ -180,12 +165,12 @@ void printBMP2(State *sprite){
     for(i=0;i<sprite->imageSize;i++)
     {
         column++;                                               // column holds next x address
-        if(sprite->image[i] != 0)                               // skip drawing if color is 0;
+        if(sprite->image[i] != TRANSPARENT_COLOR)                               // skip drawing if color is 0;
         {
             writeCmd(0x0022);
             //writeData(sprite->image[i]);
             palette_index = sprite->image[i];
-            writeData(sprite->palette[palette_index]);
+            writeData(colorPalette[palette_index]);
         }
         else
         {
@@ -262,7 +247,7 @@ void deployAsteroid(void){
                 {
                     //writeData(asteroid[i].state.image[j]);
                     palette_index = asteroid[i].state.image[j];
-                    writeData(asteroid[i].state.palette[palette_index]);
+                    writeData(colorPalette[palette_index]);
                 }
                 y_end = y_end + M;
                 asteroid[i].state.y2 = y_end;
@@ -331,8 +316,6 @@ void addAsteroidMedium(unsigned short index){
     asteroid[index].state.y2 = M;
     asteroid[index].state.life = 1;
     asteroid[index].row = ASTEROIDHEIGHT_M;
-    asteroid[index].state.palette = asteroidPalette;
-    asteroid[index].state.paletteSize = ASTEROID_PALETTE_SIZE;
     asteroid[index].state.imageSize = ASTEROIDBMP_M;
     asteroid[index].state.image = asteroidm;
     asteroid[index].state.height = ASTEROIDHEIGHT_M;
@@ -341,12 +324,12 @@ void addAsteroidMedium(unsigned short index){
 
 
 
-// Displays the 3 animations when the player crashes
+// Displays the 4 animations when the player crashes
 // Inputs: Ax, Ay are the center of the image to overlap
 // Outputs: none
 void displayExplosionAnimation(unsigned short Ax, unsigned short Ay){
     int i;
-    for(i = 0; i < 3; i++)
+    for(i = 0; i < 4; i++)
     {
         explosion[i].x1 = Ax - explosion[i].width/2;
         explosion[i].y1 = Ay - explosion[i].height/2;

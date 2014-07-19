@@ -21,8 +21,6 @@ typedef struct{
   unsigned short y1;                      // current y1
   unsigned short x2;                      // current x2
   unsigned short y2;                      // current y2
-  const unsigned short *palette;
-  unsigned short paletteSize;
   const unsigned char *image;             // ptr->image
   unsigned short imageSize;               // image size
   unsigned short life;                    // 0 = dead

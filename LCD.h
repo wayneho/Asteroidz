@@ -26,6 +26,7 @@ void Init_LCD(void);        //base LCD config
 void Init_SSI0(void);       //setup SSI0
 void Init_Analog(void);
 unsigned long Init_EEPROM(void);
+void Init_DMA(void);
 
 // functions to send cmd/data to LCD
 void writeCmd(unsigned short cmd);
@@ -62,5 +63,9 @@ void write_flash(unsigned long *data, unsigned long address);
 void write_flash_buffer(unsigned long *data,unsigned long address, unsigned char offset);
 unsigned long read_flash(unsigned long address);
 void mass_erase_flash(void);
+
+// DMA functions
+void Set_DMA_Base_Address(unsigned long address);
+void config_DMA_channel(unsigned char channel, unsigned long source, unsigned long destination, unsigned long control_word);
 
 #endif

@@ -3,10 +3,9 @@
 
 #include "stdbool.h"
 
-#define N               2                 // number of asteroids on the screen at a time (too many will cause lag)
-#define M               3                 // speed at which asteroids travel
-#define LASERS          3
-#define LASERSPEED      1
+
+#define LASERS          6
+#define LASERSPEED      2
 #define FB_BASE         0x00020000        // frame buffer located at address 0x00020000 - 0x00032BFF
 #define FB_SIZE         76800
 
@@ -17,11 +16,11 @@ extern unsigned char reset;
 //  this struct holds variables for object information such as:
 //  coordinates, life, sprite image, etc..
 typedef struct{
-  unsigned short x1;                      // current x1
+  unsigned char x1;                      // current x1
   unsigned short y1;                      // current y1
-  unsigned short x2;                      // current x2
+  unsigned char x2;                      // current x2
   unsigned short y2;                      // current y2
-  const unsigned char *image;             // ptr->image
+  const unsigned short *image;             // ptr->image
   unsigned short imageSize;               // image size
   unsigned short life;                    // 0 = dead
   unsigned short height;                  // height of image BMP
@@ -59,6 +58,7 @@ typedef struct{
 
 extern Asteroid asteroid[];
 extern State explosion[];
+extern Player player;
 
 // player functions
 void Init_Player(void);
@@ -78,6 +78,8 @@ void Init_Explosions(void);
 void addLaser(unsigned short index);
 void moveLaser(void);
 
+// aliens
+void Init_Alien(void);
 
 // helper functions
 void printBMP(State *sprite);                    // prints a NxM bitmap

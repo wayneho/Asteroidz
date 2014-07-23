@@ -5,9 +5,11 @@
 #include "math.h"
 #include "interrupts.h"
 
-int main(void)
 
+int main(void)
 {
+
+
     int EEPROM_Status;
 
     // system setup
@@ -16,6 +18,7 @@ int main(void)
 	Init_LCD();
 	Init_Interrupt();
 	Init_Analog();
+	Init_DMA();
 
 
 	retry:
@@ -31,12 +34,13 @@ int main(void)
 
 	// game setup
 	clearLCD(white);
-	Init_Timer0A(40000000);     // 80000000*12.5ns = 1s
+	Init_Timer0A(20000000);     // 80000000*12.5ns = 1s
 	Init_Timer1A(80000000);
 	Init_Player();
     Init_Explosions();
     Init_StartScreen();
 
+    config_DMA_channel(30, 0xBBBBBBBB,0xAAAAAAAA,0x99999999);
 
 
 	while(1)
@@ -48,19 +52,25 @@ int main(void)
 	            delayMS(200);                               // delay needed for touchscreen interrupt to settle
 	            reset = 0;
 	            resetGame();
-	            displayCountDown();
+	            //displayCountDown();
 	            Asteroid_Start();
 	            Distance_Start();
+
+	            clearLCD(white);
+	            //Init_Player();
 	        }
 	        else
 	        {
+
                 sliderPosition = ADC0();                        // get conversion from slide pot
                 getPlayerPosition(sliderPosition);              // get previous position of player
                 playerControl(sliderPosition);                  // move player according to slide pot value
-                //moveLaser();
+                moveLaser();
                 deployAsteroid();
                 moveAsteroid();
                 detectPlayerCollision();
+
+
 	        }
 	    }
 

@@ -28,6 +28,7 @@
 #define MAX_X										 240
 #define MAX_Y										 320
 
+
 // coordinates for touch screen
 unsigned int TS_X;
 unsigned int TS_Y;
@@ -448,7 +449,7 @@ void write_flash(unsigned long *data, unsigned long address){
 
 void write_flash_buffer(unsigned long *data,unsigned long address, unsigned char offset){
     volatile unsigned long *reg = ((volatile unsigned long *)0x400FD100);
-    reg[offset] = *data;
+    reg[offset] = *data;												// offset selects one of the 32 registers in flash write buffer
     FLASH_FMA_R = address&0x3FFFF;                                      // 18bit address
     FLASH_FMC2_R = FLASH_FMC_WRKEY + FLASH_FMC2_WRBUF;                  // write flash memory write key and WRBUF bit
     while(FLASH_FMC2_R&FLASH_FMC2_WRBUF == 0x1){};                      // wait for WRBUF bit to clear
@@ -458,5 +459,31 @@ unsigned long read_flash(unsigned long address){
     FLASH_FMA_R = address&0x3FFFF;
     return FLASH_FWBN_R;
 }
-void mass_erase_flash(void);
+
+
+void Set_DMA_Base_Address(unsigned long address){
+	UDMA_CTLBASE_R = address;
+}
+
+void Init_DMA(void){
+	SYSCTL_RCGCDMA_R = 0x1;							// enable DMA clock
+	UDMA_CFG_R = 0x1;								// enable DMA controller
+	Set_DMA_Base_Address(0x20003000);				// set table base address aligned on a 1024 byte boundary
+	UDMA_ENASET_R |= 0x80000000;					// set channel 30 to high priority
+	UDMA_ALTCLR_R |= 0x80000000;					// set primary control structure
+	UDMA_USEBURSTCLR_R |= 0x80000000;				// channel 30 responds to single and burst requests
+	UDMA_REQMASKCLR_R |= 0x80000000;				// allow controller to recognize requests from channel 30
+}
+
+void config_DMA_channel(unsigned char channel,unsigned long source, unsigned long destination, unsigned long control_word){
+	volatile unsigned long *base = ((volatile unsigned long *)UDMA_CTLBASE_R);							// get address of control table base
+	unsigned short s_pointer = channel*16;				// calculate offset for source end pointer
+	unsigned short d_pointer = channel*16 + 4;			// calculate offset for destination end pointer
+	unsigned short c_word = channel*16 + 8;				// calculate offset for control word
+	base[s_pointer/4] = source;							// set source end pointer
+	base[d_pointer/4] = destination;					// set destination end pointer
+	base[c_word/4] = control_word;						// set control word
+}
+
+
 

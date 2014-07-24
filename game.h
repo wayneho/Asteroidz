@@ -35,7 +35,8 @@ typedef struct{
 typedef struct {
     State state;
     unsigned short px1;                   // previous x1 coordinate
-    //unsigned short px2;                 // previous x2 coordinate
+    bool item;
+
 } Player;
 
 
@@ -62,7 +63,7 @@ extern Player player;
 
 // player functions
 void Init_Player(void);
-void playerControl(unsigned int);
+void playerControl(unsigned int x, unsigned int y);
 void getPlayerPosition(unsigned int);
 
 // asteroid functions
@@ -73,6 +74,11 @@ void moveAsteroid(void);
 
 // explosions
 void Init_Explosions(void);
+
+//powerup
+void Init_PowerUp(void);
+void spawnPowerUp(unsigned char index);
+void movePowerUp(void);
 
 // bullets
 void addLaser(unsigned short index);
@@ -101,7 +107,7 @@ void writeString (char word[], unsigned short x, unsigned short y, unsigned shor
 void writeCharacter (unsigned char character, unsigned short x, unsigned short y, unsigned short background,unsigned short rgb);
 
 // helper functions
-unsigned short randomValue(void);                // random between 0-189 to place asteroid inside LCD resolution of 240
+unsigned short randomValue(unsigned char range);                // random between 0-189 to place asteroid inside LCD resolution of 240
 void getCenter(State *sprite);                   // updates the center coordinates of a sprite
 void resetGame(void);
 void loopEndGame(void);

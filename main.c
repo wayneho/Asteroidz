@@ -4,6 +4,8 @@
 #include "math.h"
 #include "interrupts.h"
 
+int testvaluex;
+int testvaluey;
 
 int main(void)
 {
@@ -33,7 +35,7 @@ int main(void)
 	clearLCD(white);
 	Init_Timer0A(20000000);     // 80000000*12.5ns = 1s
 	Init_Timer1A(80000000);
-	Init_Player();
+	//Init_Player();
     Init_Explosions();
     Init_StartScreen();
 
@@ -54,20 +56,18 @@ int main(void)
 	            Distance_Start();
 
 	            clearLCD(white);
-	            //Init_Player();
+	            Init_Player();
 	        }
 	        else
 	        {
-
-                sliderPosition = ADC0();                        // get conversion from slide pot
-                getPlayerPosition(sliderPosition);              // get previous position of player
-                playerControl(sliderPosition);                  // move player according to slide pot value
-                moveLaser();
-                deployAsteroid();
+	        	testvaluex = ADC0();
+	        	testvaluey = ADC1();
+	        	detectPlayerCollision();
+                playerControl(ADC0(), ADC1());                  // move player according to slide pot value
+                //moveLaser();
+                //deployAsteroid();
                 moveAsteroid();
-                detectPlayerCollision();
-
-
+                movePowerUp();
 	        }
 	    }
 	}

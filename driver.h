@@ -20,6 +20,7 @@ void delayMS(unsigned long ms);            // delay in milliseconds
 
 // function to get ADC sample
 unsigned long ADC0(void);
+unsigned long ADC1(void);
 
 //EEPROM functions
 void check_eeprom_done(void);

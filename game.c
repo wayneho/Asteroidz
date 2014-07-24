@@ -8,6 +8,7 @@
 #include "interrupts.h"
 #include "driver.h"
 
+
 #define DAC         (*((volatile unsigned long *)0x400063C0))           // 4 bit weighted resistor DAC; PC 7-4
 
 static char N = 6;            // number of asteroids on the screen at a time (too many will cause lag)
@@ -23,6 +24,7 @@ unsigned char sliderValue;
 Player player;
 Player alien[2];
 State explosion[4];
+State powerup[2];
 Asteroid asteroid[6];
 Laser laser[LASERS];
 
@@ -40,8 +42,9 @@ void Init_Player(void){
     player.state.width = SPACESHIPWIDTH;
     player.state.height = SPACESHIPHEIGHT;
     player.state.life = 1;
-    //setWindow(player.state.x1,player.state.y1,player.state.x2,player.state.y2);
-    //printBMP(&player.state);
+    player.item = false;
+    setWindow(player.state.x1,player.state.y1,player.state.x2,player.state.y2);
+    printBMP(&player.state);
 }
 
 // Initialize the enemy image and give it a starting location on the LCD
@@ -85,6 +88,17 @@ void Init_Explosions(void){
     explosion[1].image = explosionImage1;
     explosion[2].image = explosionImage2;
     explosion[3].image = explosionImage3;
+
+}
+
+void Init_PowerUp(void){
+	int i;
+	for(i=0;i<2;i++){
+		powerup[i].x1 = 0;
+		powerup[i].y1 = 330;
+		powerup[i].x2 = powerup[i].x1 + POWERUP_WIDTH -1;
+		powerup[i].y2 = powerup[i].y1 + POWERUP_HEIGHT -1;
+	}
 }
 
 
@@ -112,7 +126,7 @@ void displayEndScreen(void){
     unsigned long num;
 
     Distance_Stop();                                     // stop distance counter
-    Asteroid_Stop();                                     // stop asteroids being generated
+    Asteroid_Stop();
     num = TimerCount;
     highscore = read_highscore();
 
@@ -220,7 +234,7 @@ void printBMP2(State *sprite){
 }
 
 
-
+/*
 // Controls the rocket ship using a 10k slide potentiometer
 // adc value 112 = stop
 // Inputs: 12 bit ADC sample
@@ -239,36 +253,59 @@ void playerControl(unsigned int slider){
         }
     }
 }
-
+*/
 // joystick configuration
-/*void playerControl(unsigned int slider){
+void playerControl(unsigned int x, unsigned int y){
 
 
-    if(player.state.x1 > 200){
-        player.state.x1 = 199;
-        player.state.x2 = player.state.x1 + SPACESHIPWIDTH -1;
-    }
-    else if(player.state.x1 < 1){
-        player.state.x1 = 2;
-        player.state.x1 = player.state.x1 + SPACESHIPWIDTH -1;
-    }
-    else
-    {
-        if(slider >= 2151 && slider < 4096){
-            player.state.x1 = player.state.x1 + 1;
-            player.state.x2 = player.state.x2 + 1;
-        }
-        if(slider < 2049 && slider >= 1){
-            player.state.x1 = player.state.x1 - 1;
-            player.state.x2 = player.state.x2 - 1;
-        }
+	if(player.state.x1 < 199){
+		if(x >= 2150 && x < 3596){
+			player.state.x1 = player.state.x1 + 1;
+			player.state.x2 = player.state.x2 + 1;
+		}
+		if(x>=3596 && x < 4096){
+			player.state.x1 = player.state.x1 + 2;
+			player.state.x2 = player.state.x2 + 2;
+		}
+	}
+	if(player.state.x1 > 1){
+		if(x < 2050 && x >= 1500){
+			player.state.x1 = player.state.x1 - 1;
+			player.state.x2 = player.state.x2 - 1;
+		}
+		if(x < 1500 && x >= 1){
+			player.state.x1 = player.state.x1 - 2;
+			player.state.x2 = player.state.x2 - 2;
+		}
+	}
 
-    }
+
+	if(player.state.y1 < 320){
+		if(y >= 2100 && y < 3596){
+			player.state.y1 = player.state.y1 + 1;
+			player.state.y2 = player.state.y2 + 1;
+		}
+		if(y>=3596 && y < 4096){
+			player.state.y1 = player.state.y1 + 2;
+			player.state.y2 = player.state.y2 + 2;
+		}
+	}
+	if(player.state.y1 > 1){
+		if(y < 2000 && y >= 1500){
+			player.state.y1 = player.state.y1 - 1;
+			player.state.y2 = player.state.y2 - 1;
+		}
+		if(y < 1500 && y >= 1){
+			player.state.y1 = player.state.y1 - 2;
+			player.state.y2 = player.state.y2 - 2;
+		}
+	}
+
 
     setWindow(player.state.x1,player.state.y1,player.state.x2,player.state.y2);
     printBMP(&player.state);
 
-}*/
+}
 
 // Get previous position of the space ship
 // Inputs: 12 bit ADC sample
@@ -372,7 +409,7 @@ void deleteAsteroid(unsigned short index){
 // Inputs: index of Asteriod struct array with life = 0
 // Outputs: none
 void addAsteroidMedium(unsigned short index){
-    asteroid[index].state.x1 = randomValue();
+    asteroid[index].state.x1 = randomValue(219);
     //Asteroid[index].state.x1 = sliderPosition*0.0513 - (ASTEROIDWIDTH_M - SPACESHIPWIDTH);
     asteroid[index].state.x2 = asteroid[index].state.x1 + (ASTEROIDWIDTH_M-1);
     asteroid[index].state.y1 = 0;
@@ -384,6 +421,7 @@ void addAsteroidMedium(unsigned short index){
     asteroid[index].state.height = ASTEROIDHEIGHT_M;
     asteroid[index].state.width = ASTEROIDWIDTH_M;
 }
+
 
 
 
@@ -424,10 +462,10 @@ bool collision(State *A, State *B)
     dy = abs(Ay - By);
     distance = sqrt(dx*dx + dy*dy);
 
-    if(distance < 0.8*radius_A + radius_B)              // circle detection
+    if(distance < 0.9*radius_A + 0.9*radius_B)              // circle detection
     {
-        displayExplosionAnimation(Ax,Ay);
-        A->life = 0;
+        //displayExplosionAnimation(Ax,Ay);
+        //A->life = A->life-1;
         return true;
     }
     else
@@ -448,8 +486,25 @@ void detectPlayerCollision(void){
     for(i=0;i<N; i++)
     {
         if(collision(&player.state, &asteroid[i].state)){
-            loopEndGame();
+        	player.state.life = player.state.life-1;
+        	player.state.image = spaceshipImage;
+        	if(player.state.life == 0){
+        		loopEndGame();
+        		return;
+        	}
         }
+    }
+
+    for(i=0;i<2;i++)
+    {
+    	if(collision(&powerup[i], &player.state)){
+    		powerup[i].life = powerup[i].life-1;
+    		if(powerup[i].life == 0){
+				player.item = true;
+				player.state.image = spaceship_item_acquired;
+				clearArea(powerup[i].x1,powerup[i].y1,powerup[i].x2,powerup[i].y2, white);
+    		}
+    	}
     }
 }
 
@@ -470,16 +525,16 @@ void loopEndGame(void){
 void addLaser(unsigned short index)
 {
     getCenter(&player.state);
-    laser[index].state.x1 = player.state.center_x - LASERBEAM__WIDTH/2;
-    laser[index].state.x2 = laser[index].state.x1 + LASERBEAM__WIDTH -1;
-    laser[index].state.y1 = player.state.y1 - LASERBEAM__HEIGHT - 3;
+    laser[index].state.x1 = player.state.center_x - LASERBEAM_WIDTH/2;
+    laser[index].state.x2 = laser[index].state.x1 + LASERBEAM_WIDTH -1;
+    laser[index].state.y1 = player.state.y1 - LASERBEAM_HEIGHT - 3;
     laser[index].state.y2 = player.state.y1 -2;
     laser[index].state.life = 1;
     laser[index].direction = 1;
     laser[index].state.imageSize = LASERBEAM_BMP;
     laser[index].state.image = laserbeam;
-    laser[index].state.height = LASERBEAM__HEIGHT;
-    laser[index].state.width = LASERBEAM__WIDTH;
+    laser[index].state.height = LASERBEAM_HEIGHT;
+    laser[index].state.width = LASERBEAM_WIDTH;
     setWindow(laser[index].state.x1, laser[index].state.y1,laser[index].state.x2,laser[index].state.y2);
     printBMP(&laser[index].state);
 
@@ -494,9 +549,9 @@ void moveLaser(void)
 
     for(i = 0; i < LASERS; i++)
     {
-        if(laser[i].state.life == 1)        // hasnt hit an object yet
+        if(laser[i].state.life == 1)        	// hasnt hit an object yet
         {
-            if(laser[i].state.y1 > 0)      // hasnt reached the end of the screen yet
+            if(laser[i].state.y1 > 0)      		// hasnt reached the end of the screen yet
             {
                 if(laser[i].direction == 1)     // being fired from player
                 {
@@ -563,11 +618,11 @@ void displayCountDown(void){
 // asteroid width: 50 pixels
 // Inputs: none
 // Outputs: random value (0-189)
-unsigned short randomValue(void){
+unsigned short randomValue(unsigned char range){
     char i;
     srand(ADC0());
     i = rand();
-    while(i > 189){
+    while(i > range){
         i = rand();
     }
     return i;
@@ -615,21 +670,27 @@ void writeCharacter (unsigned char c, unsigned short x, unsigned short y, unsign
 // Inputs: none
 // Outputs: none
 void GPIOPortA_Handler(void){
-    int i;
+    //int i;
     GPIO_PORTA_ICR_R = 0x80;    // clear interrupt flag
     delayMS(5);                // debounce switch
     if(SW0 == 0)
     {
-        for(i = 0; i < 10; i++)
+        /*for(i = 0; i < 10; i++)
         {
             if(laser[i].state.life == 0)
             {
                 addLaser(i);
                 return;
             }
-        }
+        }*/
+    	if(player.item == true){
+			player.state.life = player.state.life +1;
+			player.state.image = invulnerable_spaceship;
+    	}
 
-        //erase_eeprom(0x2,0x0);              // reset highscore - set block 1 offset 0 to 0
+    	if(player.state.life == 0){
+    		erase_eeprom(0x2,0x0);              // reset highscore - set block 1 offset 0 to 0
+    	}
     }
 
 }
@@ -671,6 +732,9 @@ void Asteroid_Handler(void){
 void Distance_Handler(void){
   TIMER1_ICR_R = 0x00000001;  // clear interrupt flag
   TimerCount++;
+  if(TimerCount == 3){
+	  spawnPowerUp(0);
+  }
 }
 
 // Creates sound when player crashes into an asteroid
@@ -698,10 +762,51 @@ void resetGame(void){
         asteroid[i].state.x1 = 0;
         asteroid[i].state.x2 = asteroid[i].state.x1 + (ASTEROIDWIDTH_M-1);
         asteroid[i].state.y1 = 330;
-        asteroid[i].state.y2 = M;
+        asteroid[i].state.y2 = asteroid[i].state.y1 + (ASTEROIDHEIGHT_M-1) ;
     }
 
     for(i = 0;i < M;i++){
         laser[i].state.life = 0;
+        laser[i].state.x1 = 0;
+        laser[i].state.x2 = laser[i].state.x1 + (LASERBEAM_WIDTH-1);
+        laser[i].state.y1 = 330;
+        laser[i].state.y1 = laser[i].state.y1 + (LASERBEAM_HEIGHT-1);
     }
+
+    for(i = 0; i < 2;i++){
+    	powerup[i].life = 0;
+    	powerup[i].x1 = 0;
+    	powerup[i].x2 = powerup[i].x1 + (POWERUP_WIDTH-1);
+    	powerup[i].y1 = 330;
+    	powerup[i].y1 = powerup[i].y1 + (POWERUP_HEIGHT-1);
+    }
+}
+
+void spawnPowerUp(unsigned char index){
+	powerup[index].x1 = randomValue(209);
+	powerup[index].x2 = powerup[index].x1 + (POWERUP_WIDTH -1);
+	powerup[index].y1 = 0;
+	powerup[index].y2 = powerup[index].y1 + (POWERUP_HEIGHT-1);
+	powerup[index].life = 1;
+	powerup[index].imageSize = POWERUP_BMP;
+	powerup[index].image = powerupImage;
+	powerup[index].height = POWERUP_HEIGHT;
+	powerup[index].width = POWERUP_WIDTH;
+}
+
+void movePowerUp(void){
+	int i;
+	for(i=0;i<2;i++){
+		if(powerup[i].life == 1){
+			if(powerup[i].y1 < 320){
+				powerup[i].y1 = powerup[i].y1 + 1;
+				powerup[i].y2 = powerup[i].y2 + 1;
+				setWindow(powerup[i].x1,powerup[i].y1,powerup[i].x2,powerup[i].y2);
+				printBMP(&powerup[i]);
+			}
+			else{
+				powerup[i].life = 0;
+			}
+		}
+	}
 }

@@ -8,8 +8,8 @@
 #define LCD_RD 									(*((volatile unsigned long *)0x40007020))		// PD3; data read latch signal when low
 #define LCD_WR  								(*((volatile unsigned long *)0x40007100))		// PD6; write = 0, read = 1
 #define LCD_CS  		 						(*((volatile unsigned long *)0x40007200))		// PD7; active low
-#define LCD_RESET								(*((volatile unsigned long *)0x40024040))		// PE4; active low
 #define LCD_BL									(*((volatile unsigned long *)0x40024080)) 		// PE5; active low
+#define LCD_RESET								(*((volatile unsigned long *)0x40004100))		// PA6; active low
 #define DEN										(*((volatile unsigned long *)0x40024004))		// PE0; active low
 #define DDIR									(*((volatile unsigned long *)0x40004100))		// PA6;
 #define DLE										(*((volatile unsigned long *)0x40024010))		// PE2;	active low

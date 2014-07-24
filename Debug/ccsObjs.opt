@@ -1,1 +1,1 @@
-"./tm4c123gh6pm_startup_ccs.obj" "./main.obj" "./interrupts.obj" "./game.obj" "./LCD.obj" "../tm4c123gh6pm.cmd" -l"libc.a" 
+"./tm4c123gh6pm_startup_ccs.obj" "./main.obj" "./interrupts.obj" "./game.obj" "./driver.obj" "./LCD.obj" "../tm4c123gh6pm.cmd" -l"libc.a" 

@@ -6,6 +6,7 @@
 #include "lcd.h"
 #include "tm4c123gh6pm.h"
 #include "interrupts.h"
+#include "driver.h"
 
 #define DAC         (*((volatile unsigned long *)0x400063C0))           // 4 bit weighted resistor DAC; PC 7-4
 
@@ -26,7 +27,7 @@ Asteroid asteroid[6];
 Laser laser[LASERS];
 
 
-// Initializes the player image and gives it a starting location on the LCD
+// Initialize the player image and give it a starting location on the LCD
 // Inputs: none
 // Outputs: none
 void Init_Player(void){
@@ -39,10 +40,13 @@ void Init_Player(void){
     player.state.width = SPACESHIPWIDTH;
     player.state.height = SPACESHIPHEIGHT;
     player.state.life = 1;
-    //setAddress(player.state.x1,player.state.y1,player.state.x2,player.state.y2);
+    //setWindow(player.state.x1,player.state.y1,player.state.x2,player.state.y2);
     //printBMP(&player.state);
 }
 
+// Initialize the enemy image and give it a starting location on the LCD
+// Inputs: none
+// Outputs: none
 void Init_Alien(void){
     int i;
     alien[0].state.x1 = 60;
@@ -56,9 +60,9 @@ void Init_Alien(void){
         alien[i].state.height = ALIENSHIPHEIGHT;
         alien[i].state.life = 1;
     }
-    //setAddress(alien[0].state.x1,alien[0].state.y1,alien[0].state.x2,alien[0].state.y2);
+    //setWindow(alien[0].state.x1,alien[0].state.y1,alien[0].state.x2,alien[0].state.y2);
 
-    setAddress(alien[0].state.x1,alien[0].state.y1,alien[0].state.x2,alien[0].state.y2);
+    setWindow(alien[0].state.x1,alien[0].state.y1,alien[0].state.x2,alien[0].state.y2);
     printBMP(&alien[0].state);
 }
 
@@ -90,8 +94,8 @@ void Init_Explosions(void){
 void Init_StartScreen(void)
 {
     int i ;
-    int palette_index;
-    setAddress(0,0,239,319);
+    //int palette_index;
+    setWindow(0,0,239,319);
     writeCmd(0x0022);
     for(i = 0; i < 76800; i++)
     {
@@ -104,7 +108,7 @@ void Init_StartScreen(void)
 // Inputs: none
 // Outputs: none
 void displayEndScreen(void){
-    long highscore;
+    unsigned long highscore;
     unsigned long num;
 
     Distance_Stop();                                     // stop distance counter
@@ -127,15 +131,20 @@ void displayEndScreen(void){
     }
     sprintf(buffer, "%i", highscore);
     writeString(buffer, 165,50, red, white);
-
-
 }
+
+// Writes the new high score into EEPROM
+// Inputs: 32bit word
+// Outputs: none
 void write_highscore(unsigned long score){
-    write_sector(0x2,0x0,&score);                   // sector 1, offset 0
+    write_eeprom(0x2,0x0,&score);                   // block 1, offset 0
 }
 
+// Writes the high score from EEPROM
+// Inputs: none
+// Outputs: 32 bit word
 unsigned long read_highscore(void){
-    return read_sector(0x2,0x0);                   // sector 1, offset 0
+    return read_eeprom(0x2,0x0);                   // block 1, offset 0
 }
 
 
@@ -225,7 +234,7 @@ void playerControl(unsigned int slider){
         {
             player.state.x1 = sliderValue;
             player.state.x2 = sliderValue + (player.state.width -1);
-            setAddress(player.state.x1,player.state.y1,player.state.x2,player.state.y2);
+            setWindow(player.state.x1,player.state.y1,player.state.x2,player.state.y2);
             printBMP(&player.state);
         }
     }
@@ -256,7 +265,7 @@ void playerControl(unsigned int slider){
 
     }
 
-    setAddress(player.state.x1,player.state.y1,player.state.x2,player.state.y2);
+    setWindow(player.state.x1,player.state.y1,player.state.x2,player.state.y2);
     printBMP(&player.state);
 
 }*/
@@ -277,7 +286,7 @@ void getPlayerPosition(unsigned int slider){
 void deployAsteroid(void){
     char i;
     int j;
-    int palette_index;
+    //int palette_index;
     unsigned short x_start, x_end,y_start, y_end, row;
 
 
@@ -293,7 +302,7 @@ void deployAsteroid(void){
 
             if(y_end < asteroid[i].state.height)                    // if astroid has not fully entered screen
             {
-                setAddress(x_start, y_start, x_end, y_end);
+                setWindow(x_start, y_start, x_end, y_end);
                 writeCmd(0x0022);
                 row = row - M;                                      // increment number of bottom rows to draw depending on speed of asteroid
                 asteroid[i].row = row;
@@ -339,7 +348,7 @@ void moveAsteroid(void){
                     asteroid[i].state.y1 = asteroid[i].state.y1 + M;
                     asteroid[i].state.y2 = asteroid[i].state.y2 + M;
                     clearArea(asteroid[i].state.x1, asteroid[i].state.y1-M, asteroid[i].state.x2 , asteroid[i].state.y1+1, white);
-                    setAddress(asteroid[i].state.x1,asteroid[i].state.y1,asteroid[i].state.x2,asteroid[i].state.y2);
+                    setWindow(asteroid[i].state.x1,asteroid[i].state.y1,asteroid[i].state.x2,asteroid[i].state.y2);
                     printBMP(&asteroid[i].state);
 
                 }
@@ -390,7 +399,7 @@ void displayExplosionAnimation(unsigned short Ax, unsigned short Ay){
         explosion[i].x2 = explosion[i].x1 + explosion[i].width -1;
         explosion[i].y2 = explosion[i].y1 + explosion[i].height -1;
 
-        setAddress(explosion[i].x1,explosion[i].y1,explosion[i].x2,explosion[i].y2);
+        setWindow(explosion[i].x1,explosion[i].y1,explosion[i].x2,explosion[i].y2);
         printBMP2(&explosion[i]);
         delayMS(100);
     }
@@ -431,7 +440,9 @@ bool collision(State *A, State *B)
 
 }
 
-
+// Check if player has collided with an asteroid
+// Inputs: none
+// Outputs: none
 void detectPlayerCollision(void){
     int i;
     for(i=0;i<N; i++)
@@ -442,6 +453,9 @@ void detectPlayerCollision(void){
     }
 }
 
+// Display explosion animation continuously
+// Inputs: none
+// Outputs: none
 void loopEndGame(void){
     displayEndScreen();
     while(player.state.life == 0){
@@ -466,7 +480,7 @@ void addLaser(unsigned short index)
     laser[index].state.image = laserbeam;
     laser[index].state.height = LASERBEAM__HEIGHT;
     laser[index].state.width = LASERBEAM__WIDTH;
-    setAddress(laser[index].state.x1, laser[index].state.y1,laser[index].state.x2,laser[index].state.y2);
+    setWindow(laser[index].state.x1, laser[index].state.y1,laser[index].state.x2,laser[index].state.y2);
     printBMP(&laser[index].state);
 
 }
@@ -494,7 +508,7 @@ void moveLaser(void)
                     laser[i].state.y1 = laser[i].state.y1 + LASERSPEED;
                     laser[i].state.y2 = laser[i].state.y2 + LASERSPEED;
                 }
-                setAddress(laser[i].state.x1, laser[i].state.y1,laser[i].state.x2,laser[i].state.y2);
+                setWindow(laser[i].state.x1, laser[i].state.y1,laser[i].state.x2,laser[i].state.y2);
 
                 printBMP(&laser[i].state);
 
@@ -615,7 +629,7 @@ void GPIOPortA_Handler(void){
             }
         }
 
-        //erase_sector(0x2,0x0);              // reset highscore
+        //erase_eeprom(0x2,0x0);              // reset highscore - set block 1 offset 0 to 0
     }
 
 }
@@ -671,6 +685,9 @@ void Sound_Handler(void){
   DAC = SineWave[Index] << 4;   // output one value each interrupt
 }
 
+// Resets the game by setting score to 0 and removing all asteriods and lasers from LCD
+// Inputs: none
+// Outputs: none
 void resetGame(void){
     int i;
     TimerCount = 0;
@@ -683,6 +700,7 @@ void resetGame(void){
         asteroid[i].state.y1 = 330;
         asteroid[i].state.y2 = M;
     }
+
     for(i = 0;i < M;i++){
         laser[i].state.life = 0;
     }

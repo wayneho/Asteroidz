@@ -1,5 +1,4 @@
-
-
+#include "driver.h"
 #include "LCD.H"
 #include "game.h"
 #include "math.h"
@@ -8,8 +7,6 @@
 
 int main(void)
 {
-
-
     int EEPROM_Status;
 
     // system setup
@@ -40,8 +37,8 @@ int main(void)
     Init_Explosions();
     Init_StartScreen();
 
-    config_DMA_channel(30, 0xBBBBBBBB,0xAAAAAAAA,0x99999999);
-
+    //config_DMA_channel(30,0x20000063, 0x20005000,0x0003C632);		// 8 bit increment , no arbitration
+    //start_DMA_transfer();
 
 	while(1)
 	{
@@ -73,8 +70,6 @@ int main(void)
 
 	        }
 	    }
-
-
 	}
 }
 

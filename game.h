@@ -81,22 +81,17 @@ void moveLaser(void);
 // aliens
 void Init_Alien(void);
 
-// helper functions
+// functions to display images and animations
 void printBMP(State *sprite);                    // prints a NxM bitmap
 void printBMP2(State *sprite);                   // prints a NxM bitmap with transparent background (must be white)
-void printBMP3(State *sprite);
-bool collision(State *A, State *B);              // collision detection using bounding circles algorithm
-unsigned short randomValue(void);                // random between 0-189 to place asteroid inside LCD resolution of 240
-void getCenter(State *sprite);                   // updates the center coordinates of a sprite
 void Init_StartScreen(void);
-void displayEndScreen(void);                     // function to display score at the end of the game
-void detectPlayerCollision(void);
 void displayCountDown(void);
-void resetGame(void);
+void displayEndScreen(void);                     // function to display score at the end of the game
 void displayExplosionAnimation(unsigned short x, unsigned short y);
-void loopEndGame(void);
-void write_highscore(unsigned long score);
-unsigned long read_highscore(void);
+
+// functions for collision
+bool collision(State *A, State *B);              // collision detection using bounding circles algorithm
+void detectPlayerCollision(void);
 
 // function to create sound
 void playSound(void);
@@ -105,6 +100,13 @@ void playSound(void);
 void writeString (char word[], unsigned short x, unsigned short y, unsigned short background, unsigned short rgb);
 void writeCharacter (unsigned char character, unsigned short x, unsigned short y, unsigned short background,unsigned short rgb);
 
+// helper functions
+unsigned short randomValue(void);                // random between 0-189 to place asteroid inside LCD resolution of 240
+void getCenter(State *sprite);                   // updates the center coordinates of a sprite
+void resetGame(void);
+void loopEndGame(void);
+void write_highscore(unsigned long score);
+unsigned long read_highscore(void);
 
 // Interrupt handlers
 void Asteroid_Handler(void);

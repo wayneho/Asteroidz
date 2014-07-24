@@ -16,6 +16,7 @@ game.obj: c:/ti/ccsv6/tools/compiler/arm_5.1.6/include/stdarg.h
 game.obj: ../lcd.h
 game.obj: ../tm4c123gh6pm.h
 game.obj: ../interrupts.h
+game.obj: ../driver.h
 
 ../game.c: 
 ../game.h: 
@@ -33,3 +34,4 @@ c:/ti/ccsv6/tools/compiler/arm_5.1.6/include/stdarg.h:
 ../lcd.h: 
 ../tm4c123gh6pm.h: 
 ../interrupts.h: 
+../driver.h: 

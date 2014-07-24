@@ -1,6 +1,7 @@
 # FIXED
 
 main.obj: ../main.c
+main.obj: ../driver.h
 main.obj: ../LCD.H
 main.obj: ../game.h
 main.obj: c:/ti/ccsv6/tools/compiler/arm_5.1.6/include/stdbool.h
@@ -13,6 +14,7 @@ main.obj: c:/ti/ccsv6/tools/compiler/arm_5.1.6/include/ymath.h
 main.obj: ../interrupts.h
 
 ../main.c: 
+../driver.h: 
 ../LCD.H: 
 ../game.h: 
 c:/ti/ccsv6/tools/compiler/arm_5.1.6/include/stdbool.h: 

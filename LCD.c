@@ -160,7 +160,8 @@ void setWindow(unsigned short x1,unsigned short y1,unsigned short x2,unsigned sh
 // Clears the entire LCD screen
 // Inputs: color of background
 // Outputs: none
-void clearLCD(unsigned short rgb){
+void clearLCD(unsigned short rgb)
+{
 	unsigned int i;
 	setWindow(0,0,239,319);
 	writeCmd(0x0022);

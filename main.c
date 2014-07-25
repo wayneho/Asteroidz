@@ -37,6 +37,7 @@ int main(void)
 	Init_Timer1A(80000000);
 	//Init_Player();
     Init_Explosions();
+    Init_PowerUp();
     Init_StartScreen();
 
     //config_DMA_channel(30,0x20000063, 0x20005000,0x0003C632);		// 8 bit increment , no arbitration
@@ -62,12 +63,15 @@ int main(void)
 	        {
 	        	testvaluex = ADC0();
 	        	testvaluey = ADC1();
+	        	displayScore();
 	        	detectPlayerCollision();
+	        	shieldStatus();
                 playerControl(ADC0(), ADC1());                  // move player according to slide pot value
                 //moveLaser();
-                //deployAsteroid();
+                deployAsteroid();
                 moveAsteroid();
                 movePowerUp();
+
 	        }
 	    }
 	}

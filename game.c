@@ -13,20 +13,21 @@
 
 static char N = 6;            // number of asteroids on the screen at a time (too many will cause lag)
 static char M = 1;            // speed at which asteroids travel
-const unsigned char SineWave[30] = {8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7};        // annoying noise
-unsigned char Index;
+static unsigned long shield_timer;
+static const unsigned char SineWave[30] = {8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7};        // annoying noise
+static unsigned char Index;
 unsigned char reset = 1;
 unsigned char start;                               //flag to start game after screen has been touched
-unsigned long TimerCount;                          //counter for time travelled
-unsigned int sliderPosition;                       //position of slider pot (0-4096)
-unsigned char sliderValue;
+static unsigned long TimerCount;                          //counter for time travelled
+static unsigned long game_score;
+
 
 Player player;
 Player alien[2];
 State explosion[4];
 State powerup[2];
 Asteroid asteroid[6];
-Laser laser[LASERS];
+
 
 
 // Initialize the player image and give it a starting location on the LCD
@@ -91,16 +92,6 @@ void Init_Explosions(void){
 
 }
 
-void Init_PowerUp(void){
-	int i;
-	for(i=0;i<2;i++){
-		powerup[i].x1 = 0;
-		powerup[i].y1 = 330;
-		powerup[i].x2 = powerup[i].x1 + POWERUP_WIDTH -1;
-		powerup[i].y2 = powerup[i].y1 + POWERUP_HEIGHT -1;
-	}
-}
-
 
 // Displays the starting image
 // Inputs: none
@@ -127,16 +118,16 @@ void displayEndScreen(void){
 
     Distance_Stop();                                     // stop distance counter
     Asteroid_Stop();
-    num = TimerCount;
+    num = game_score;
     highscore = read_highscore();
 
     char buffer[10];
-    char words[] = {"TIME TRAVELLED(s): "};
+    char words[] = {"SCORE: "};
     char words2[] = {"HIGHSCORE: "};
 
     sprintf(buffer, "%i", num);
     writeString(words, 15, 30, red, white);
-    writeString(buffer, 165,30, red, white);
+    writeString(buffer, 150,30, red, white);
     writeString(words2, 15, 50, red, white);
 
     if(num > highscore){
@@ -144,7 +135,28 @@ void displayEndScreen(void){
         highscore = num;
     }
     sprintf(buffer, "%i", highscore);
-    writeString(buffer, 165,50, red, white);
+    writeString(buffer, 150,50, red, white);
+    //clearArea(0,0,24,10,white);
+}
+
+void displayScore(void){
+	unsigned long score, time;
+    //char words2[] = {"SCORE: "};
+    //char words[] = {"TIME: "};
+	char buffer[10];
+	char buffer2[10];
+
+	score = game_score;
+	time = TimerCount;
+
+	sprintf(buffer, "%i", score);
+	sprintf(buffer2, "%i", time);
+
+    //writeString(words, 0, 1, red, white);
+    //writeString(words2, 0,10, red, white);
+	//writeString(buffer, 43,1, red, white);
+	writeString(buffer2, 0,1, red, white);
+
 }
 
 // Writes the new high score into EEPROM
@@ -234,27 +246,11 @@ void printBMP2(State *sprite){
 }
 
 
-/*
-// Controls the rocket ship using a 10k slide potentiometer
-// adc value 112 = stop
-// Inputs: 12 bit ADC sample
-// Outputs: none
-void playerControl(unsigned int slider){
-    int sliderValue= slider*0.0488;             // 12 bit ADC - 220pixels/4096values = ~0.0537
 
-    if (player.state.x1 != player.px1)
-    {
-        if(abs(player.state.x1 - player.px1) > 2)             // debounce rapid changes in the slide potentiometer
-        {
-            player.state.x1 = sliderValue;
-            player.state.x2 = sliderValue + (player.state.width -1);
-            setWindow(player.state.x1,player.state.y1,player.state.x2,player.state.y2);
-            printBMP(&player.state);
-        }
-    }
-}
-*/
-// joystick configuration
+// Controls the rocket ship using a 10k joystick
+// player movement is based on the values from two 12bit ADCs
+// Inputs: 12 bit ADC sample for x and y direction
+// Outputs: none
 void playerControl(unsigned int x, unsigned int y){
 
 
@@ -278,8 +274,6 @@ void playerControl(unsigned int x, unsigned int y){
 			player.state.x2 = player.state.x2 - 2;
 		}
 	}
-
-
 	if(player.state.y1 < 320){
 		if(y >= 2100 && y < 3596){
 			player.state.y1 = player.state.y1 + 1;
@@ -307,12 +301,17 @@ void playerControl(unsigned int x, unsigned int y){
 
 }
 
-// Get previous position of the space ship
-// Inputs: 12 bit ADC sample
+// Shield expires after 3 seconds
+// change image of player sprite and negate 1 life
+// Inputs: none
 // Outputs: none
-void getPlayerPosition(unsigned int slider){
-    player.px1 = slider*0.0488;
-    //player.px1 = player.state.x1;
+void shieldStatus(void){
+	if(player.state.image == invulnerable_spaceship){
+		if(TimerCount >= shield_timer+3){
+			player.state.life -= 1;
+			player.state.image = spaceshipImage;
+		}
+	}
 
 }
 
@@ -378,13 +377,13 @@ void moveAsteroid(void){
             {
                 if(asteroid[i].state.y1 >= 320)
                 {
-                    deleteAsteroid(i);
+                    asteroid[i].state.life = 0;
                 }
                 else
                 {
                     asteroid[i].state.y1 = asteroid[i].state.y1 + M;
                     asteroid[i].state.y2 = asteroid[i].state.y2 + M;
-                    clearArea(asteroid[i].state.x1, asteroid[i].state.y1-M, asteroid[i].state.x2 , asteroid[i].state.y1+1, white);
+                    //clearArea(asteroid[i].state.x1, asteroid[i].state.y1-M, asteroid[i].state.x2 , asteroid[i].state.y1+1, white);
                     setWindow(asteroid[i].state.x1,asteroid[i].state.y1,asteroid[i].state.x2,asteroid[i].state.y2);
                     printBMP(&asteroid[i].state);
 
@@ -394,15 +393,15 @@ void moveAsteroid(void){
     }
 }
 
-// Sets the life to 0 to be overwritten by a new asteroid
-// Inputs: index of asteroid to delete
+// Sets the life of the sprite to 0 and moves it offscreen
+// Inputs: spointer to sprite to delete
 // Outputs: none
-void deleteAsteroid(unsigned short index){
-    asteroid[index].state.life = 0;
-/*    asteroid[index].state.x1 = 300;
-    asteroid[index].state.x2 = asteroid[index].state.x1 + (ASTEROIDWIDTH_M-1);
-    asteroid[index].state.y1 = 350;
-    asteroid[index].state.y2 = 350+M;*/
+void deleteSprite(State *sprite){
+	sprite->life = 0;
+	sprite->x1 = 0;
+	sprite->x2 = 0;
+	sprite->y1 = 340;
+	sprite->y2 = 340;
 }
 
 // Creates new astroid starting at a random x location
@@ -410,7 +409,6 @@ void deleteAsteroid(unsigned short index){
 // Outputs: none
 void addAsteroidMedium(unsigned short index){
     asteroid[index].state.x1 = randomValue(219);
-    //Asteroid[index].state.x1 = sliderPosition*0.0513 - (ASTEROIDWIDTH_M - SPACESHIPWIDTH);
     asteroid[index].state.x2 = asteroid[index].state.x1 + (ASTEROIDWIDTH_M-1);
     asteroid[index].state.y1 = 0;
     asteroid[index].state.y2 = M;
@@ -478,7 +476,7 @@ bool collision(State *A, State *B)
 
 }
 
-// Check if player has collided with an asteroid
+// Check if player has collided with another an asteroid or a PowerUp
 // Inputs: none
 // Outputs: none
 void detectPlayerCollision(void){
@@ -486,8 +484,13 @@ void detectPlayerCollision(void){
     for(i=0;i<N; i++)
     {
         if(collision(&player.state, &asteroid[i].state)){
-        	player.state.life = player.state.life-1;
         	player.state.image = spaceshipImage;
+        	player.state.life = player.state.life-1;
+        	//asteroid[i].state.life = asteroid[i].state.life-1;
+
+        	clearArea(asteroid[i].state.x1, asteroid[i].state.y1, asteroid[i].state.x2 , asteroid[i].state.y2, white);
+        	deleteSprite(&asteroid[i].state);
+
         	if(player.state.life == 0){
         		loopEndGame();
         		return;
@@ -498,11 +501,17 @@ void detectPlayerCollision(void){
     for(i=0;i<2;i++)
     {
     	if(collision(&powerup[i], &player.state)){
-    		powerup[i].life = powerup[i].life-1;
-    		if(powerup[i].life == 0){
+    		if(powerup[i].life == 1){
+    			powerup[i].life = powerup[i].life-1;
 				player.item = true;
-				player.state.image = spaceship_item_acquired;
 				clearArea(powerup[i].x1,powerup[i].y1,powerup[i].x2,powerup[i].y2, white);
+
+				if(powerup[i].image == powerup_shield_image){
+					player.state.image = spaceship_item_acquired;
+				}
+				else{
+					game_score+=3;
+				}
     		}
     	}
     }
@@ -519,64 +528,6 @@ void loopEndGame(void){
     }
 }
 
-// Adds a laser beam to the Laser Struct array
-// Inputs: index in the array
-// Outputs: none
-void addLaser(unsigned short index)
-{
-    getCenter(&player.state);
-    laser[index].state.x1 = player.state.center_x - LASERBEAM_WIDTH/2;
-    laser[index].state.x2 = laser[index].state.x1 + LASERBEAM_WIDTH -1;
-    laser[index].state.y1 = player.state.y1 - LASERBEAM_HEIGHT - 3;
-    laser[index].state.y2 = player.state.y1 -2;
-    laser[index].state.life = 1;
-    laser[index].direction = 1;
-    laser[index].state.imageSize = LASERBEAM_BMP;
-    laser[index].state.image = laserbeam;
-    laser[index].state.height = LASERBEAM_HEIGHT;
-    laser[index].state.width = LASERBEAM_WIDTH;
-    setWindow(laser[index].state.x1, laser[index].state.y1,laser[index].state.x2,laser[index].state.y2);
-    printBMP(&laser[index].state);
-
-}
-
-// Move all lasers depending on direction and speed
-// Inputs: none
-// Outputs: none
-void moveLaser(void)
-{
-    int i;
-
-    for(i = 0; i < LASERS; i++)
-    {
-        if(laser[i].state.life == 1)        	// hasnt hit an object yet
-        {
-            if(laser[i].state.y1 > 0)      		// hasnt reached the end of the screen yet
-            {
-                if(laser[i].direction == 1)     // being fired from player
-                {
-                    laser[i].state.y1 = laser[i].state.y1 - LASERSPEED;
-                    laser[i].state.y2 = laser[i].state.y2 - LASERSPEED;
-                }
-                else
-                {
-                    laser[i].state.y1 = laser[i].state.y1 + LASERSPEED;
-                    laser[i].state.y2 = laser[i].state.y2 + LASERSPEED;
-                }
-                setWindow(laser[i].state.x1, laser[i].state.y1,laser[i].state.x2,laser[i].state.y2);
-
-                printBMP(&laser[i].state);
-
-            }
-            else   // delete laser and clear area
-            {
-                laser[i].state.life = 0;
-                clearArea(laser[i].state.x1, laser[i].state.y1,laser[i].state.x2+1,laser[i].state.y2 +1, white);
-            }
-        }
-    }
-
-}
 
 // Plays sound that alternates between 440Hz and 330Hz
 // Inputs: none
@@ -665,33 +616,32 @@ void writeCharacter (unsigned char c, unsigned short x, unsigned short y, unsign
     }
 }
 
-// Interrupt to a switch used to fire lasers
+// Interrupt to a switch.  This button uses the shield PowerUp if the player has acquired that item.
+// If the game is displaying the end screen then this button resets the highscore
 // Priority level 4
 // Inputs: none
 // Outputs: none
 void GPIOPortA_Handler(void){
     //int i;
-    GPIO_PORTA_ICR_R = 0x80;    // clear interrupt flag
+
     delayMS(5);                // debounce switch
     if(SW0 == 0)
     {
-        /*for(i = 0; i < 10; i++)
-        {
-            if(laser[i].state.life == 0)
-            {
-                addLaser(i);
-                return;
-            }
-        }*/
     	if(player.item == true){
-			player.state.life = player.state.life +1;
-			player.state.image = invulnerable_spaceship;
+    		if(player.state.image == spaceship_item_acquired)
+    		{
+				player.state.life += 1;
+				player.state.image = invulnerable_spaceship;
+				shield_timer = TimerCount;
+    		}
+			player.item = false;
     	}
 
     	if(player.state.life == 0){
     		erase_eeprom(0x2,0x0);              // reset highscore - set block 1 offset 0 to 0
     	}
     }
+    GPIO_PORTA_ICR_R = 0x80;    // clear interrupt flag
 
 }
 
@@ -726,74 +676,102 @@ void Asteroid_Handler(void){
   }
 }
 
-// Keeps track of time traveled with a counter
+// Keeps track of time traveled and spawns powerups
 // Inputs: none
 // Outputs: none
 void Distance_Handler(void){
-  TIMER1_ICR_R = 0x00000001;  // clear interrupt flag
-  TimerCount++;
-  if(TimerCount == 3){
-	  spawnPowerUp(0);
-  }
+	int i;
+	TIMER1_ICR_R = 0x00000001;  // clear interrupt flag
+	TimerCount++;
+	game_score++;
+	if(TimerCount >= 20){
+		M = 2;						// increase asteroid speed
+	}
+	if(randomValue(5) == 5){
+	  for(i=0;i<2;i++){
+		  if(powerup[i].life == 0){
+			  spawnPowerUp(i);
+			  return;
+		  }
+	  }
+
+	}
 }
 
 // Creates sound when player crashes into an asteroid
 // Inputs: none
 // Outputs: none
 void Sound_Handler(void){
-  TIMER2_ICR_R = 0x00000001;     // clear interrupt flag
-  if(Index >= 30){
-      Index = 0;
-  }
-  Index = (Index+1)&0xFF;       // 8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7
-  DAC = SineWave[Index] << 4;   // output one value each interrupt
+	TIMER2_ICR_R = 0x00000001;     // clear interrupt flag
+	if(Index >= 30){
+	  Index = 0;
+	}
+	Index = (Index+1)&0xFF;       // 8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7
+	DAC = SineWave[Index] << 4;   // output one value each interrupt
 }
 
-// Resets the game by setting score to 0 and removing all asteriods and lasers from LCD
+// Resets the game by setting score to 0 and removing all sprites from LCD
 // Inputs: none
 // Outputs: none
 void resetGame(void){
     int i;
     TimerCount = 0;
+    game_score = 0;
     Index = 0;
+    M = 1;
 
     for(i = 0;i < N;i++){
-        deleteAsteroid(i);
-        asteroid[i].state.x1 = 0;
-        asteroid[i].state.x2 = asteroid[i].state.x1 + (ASTEROIDWIDTH_M-1);
-        asteroid[i].state.y1 = 330;
-        asteroid[i].state.y2 = asteroid[i].state.y1 + (ASTEROIDHEIGHT_M-1) ;
-    }
-
-    for(i = 0;i < M;i++){
-        laser[i].state.life = 0;
-        laser[i].state.x1 = 0;
-        laser[i].state.x2 = laser[i].state.x1 + (LASERBEAM_WIDTH-1);
-        laser[i].state.y1 = 330;
-        laser[i].state.y1 = laser[i].state.y1 + (LASERBEAM_HEIGHT-1);
+        deleteSprite(&asteroid[i].state);
     }
 
     for(i = 0; i < 2;i++){
-    	powerup[i].life = 0;
-    	powerup[i].x1 = 0;
-    	powerup[i].x2 = powerup[i].x1 + (POWERUP_WIDTH-1);
-    	powerup[i].y1 = 330;
-    	powerup[i].y1 = powerup[i].y1 + (POWERUP_HEIGHT-1);
+    	deleteSprite(&powerup[i]);
     }
 }
 
+// Function to setup the PowerUp image sizes
+// Inputs: none
+// Outputs: none
+void Init_PowerUp(void){
+	int i;
+	for(i=0;i<2;i++){
+		powerup[i].x1 = 0;
+		powerup[i].y1 = 330;
+		powerup[i].x2 = powerup[i].x1 + POWERUP_WIDTH -1;
+		powerup[i].y2 = powerup[i].y1 + POWERUP_HEIGHT -1;
+		powerup[i].height = POWERUP_HEIGHT;
+		powerup[i].width = POWERUP_WIDTH;
+		powerup[i].imageSize = POWERUP_BMP;
+	}
+}
+// Function to spawn power ups.  The score+3 powerup spawns more frequently than the shield powerup
+// If player is already holding the shield powerup then it will only spawn score+3
+// Input: index into powerup struct array
+// Output: none
 void spawnPowerUp(unsigned char index){
 	powerup[index].x1 = randomValue(209);
 	powerup[index].x2 = powerup[index].x1 + (POWERUP_WIDTH -1);
 	powerup[index].y1 = 0;
 	powerup[index].y2 = powerup[index].y1 + (POWERUP_HEIGHT-1);
 	powerup[index].life = 1;
-	powerup[index].imageSize = POWERUP_BMP;
-	powerup[index].image = powerupImage;
-	powerup[index].height = POWERUP_HEIGHT;
-	powerup[index].width = POWERUP_WIDTH;
-}
 
+	if(randomValue(3) == 0){
+		if(player.state.image == spaceship_item_acquired || player.state.image == invulnerable_spaceship){						// if player already has shield item
+			powerup[index].image = image_data_bonus;
+		}
+		else
+		{
+			powerup[index].image = powerup_shield_image;
+		}
+	}
+	else{
+		powerup[index].image = image_data_bonus;
+		//powerup[index].image = powerup_shield_image;
+	}
+}
+// Moves PowerUps down the screen by one pixel
+// Inputs: none
+// Outputs: none
 void movePowerUp(void){
 	int i;
 	for(i=0;i<2;i++){

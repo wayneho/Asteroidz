@@ -3,14 +3,10 @@
 
 #include "stdbool.h"
 
-
-#define LASERS          6
-#define LASERSPEED      2
 #define FB_BASE         0x00020000        // frame buffer located at address 0x00020000 - 0x00032BFF
 #define FB_SIZE         76800
 
 extern unsigned char start;                               //flag to start game after screen has been touched
-extern unsigned int sliderPosition;                       //position of slider pot (0-4096)
 extern unsigned char reset;
 
 //  this struct holds variables for object information such as:
@@ -49,14 +45,6 @@ typedef struct{
 } Asteroid;
 
 
-//  this struct inherits from the struct State and contains the direction of the
-//  laser beam
-typedef struct{
-    State state;
-    unsigned short direction;           // 1 = up; 0 = down
-} Laser;
-
-
 extern Asteroid asteroid[];
 extern State explosion[];
 extern Player player;
@@ -71,6 +59,7 @@ void deployAsteroid(void);                              // animation for astroid
 void addAsteroidMedium(unsigned short index);           // updates array with new astroid state
 void deleteAsteroid(unsigned short index);
 void moveAsteroid(void);
+void deleteSprite(State *sprite);
 
 // explosions
 void Init_Explosions(void);
@@ -79,10 +68,7 @@ void Init_Explosions(void);
 void Init_PowerUp(void);
 void spawnPowerUp(unsigned char index);
 void movePowerUp(void);
-
-// bullets
-void addLaser(unsigned short index);
-void moveLaser(void);
+void shieldStatus(void);
 
 // aliens
 void Init_Alien(void);
@@ -94,6 +80,7 @@ void Init_StartScreen(void);
 void displayCountDown(void);
 void displayEndScreen(void);                     // function to display score at the end of the game
 void displayExplosionAnimation(unsigned short x, unsigned short y);
+void displayScore(void);
 
 // functions for collision
 bool collision(State *A, State *B);              // collision detection using bounding circles algorithm

@@ -1,8 +1,6 @@
 #include "tm4c123gh6pm.h"
 
 // Initialize Interrupts for PE3 and PA7
-// Inputs: none
-// Outputs: none
 void Init_Interrupt(void){
     GPIO_PORTE_IS_R  &= ~0x08;                                                      //  PE3 is edge-sensitive
     GPIO_PORTE_IBE_R &= ~0x08;                                                      //  PE3 is not both edges
@@ -10,27 +8,21 @@ void Init_Interrupt(void){
     GPIO_PORTE_ICR_R  = 0x08;                                                       //  clear flag PE3
     GPIO_PORTE_IM_R  |= 0x08;                                                       //  enable interrupt on PE3
     NVIC_PRI1_R = (NVIC_PRI1_R&0xFFFFFF0F)|0x000000A0;                              //  priority 5
-
-
     GPIO_PORTA_IS_R  &= ~0x80;                                                      //  PA7 is edge-sensitive
     GPIO_PORTA_IBE_R &= ~0x80;                                                      //  PA7 is not both edges
     GPIO_PORTA_IEV_R &= ~0x80;                                                      //  PA7 falling edge event
     GPIO_PORTA_ICR_R  = 0x80;                                                       //  clear flag PA7
     GPIO_PORTA_IM_R  |= 0x80;                                                       //  enable interrupt on PE3
     NVIC_PRI0_R = (NVIC_PRI0_R&0xFFFFFF0F)|0x00000080;                              //  priority 4
-
     NVIC_EN0_R = 0x00000011;                                                        // enable interrupt vector for Port A, E
-
 }
 
 // Initialize Timer0A for time-out interrupt
 // Inputs: time-out period
-// Outputs: none
 void Init_Timer0A(unsigned long period){
     unsigned long volatile delay;
     SYSCTL_RCGCTIMER_R |= 0x01;                             // activate clock for timer0A
     delay = SYSCTL_RCGCTIMER_R;                             // give time for clock to start
-
     TIMER0_CTL_R = 0x00000000;                              // disable timer0A
     TIMER0_CFG_R = 0x00000000;                              // 32-bit mode
     TIMER0_TAMR_R = 0x00000002;                             // periodic mode
@@ -44,28 +36,21 @@ void Init_Timer0A(unsigned long period){
 }
 
 // Stop Timer0A
-// Inputs: none
-// Outputs: none
 void Asteroid_Stop(void){
   TIMER0_CTL_R &= ~0x00000001; // disable
 }
 
 // Start Timer0A
-// Inputs: none
-// Outputs: none
 void Asteroid_Start(void){
   TIMER0_CTL_R |= 0x00000001;   // enable
 }
 
-
 // Initialize Timer1A for time-out interrupt
 // Inputs: time-out period
-// Outputs: none
 void Init_Timer1A(unsigned long period){
     unsigned long volatile delay;
     SYSCTL_RCGCTIMER_R |= 0x02;                             // activate clock for timer1A
     delay = SYSCTL_RCGCTIMER_R;                             // give time for clock to start
-
     TIMER1_CTL_R = 0x00000000;                              // disable timer1A
     TIMER1_CFG_R = 0x00000000;                              // 32-bit mode
     TIMER1_TAMR_R = 0x00000002;                             // periodic mode
@@ -76,32 +61,24 @@ void Init_Timer1A(unsigned long period){
     NVIC_PRI5_R = (NVIC_PRI5_R&0xFFFF00FF)|0x00006000;      // priority 3
     NVIC_EN0_R = 1<<21;                                     // enable IRQ 21
     //TIMER1_CTL_R = 0x00000001;          // enable timer1A
-
 }
 
 // Stop Timer1A
-// Inputs: none
-// Outputs: none
 void Distance_Stop(void){
   TIMER1_CTL_R &= ~0x00000001; // disable
 }
 
 // Start Timer1A
-// Inputs: none
-// Outputs: none
 void Distance_Start(void){
   TIMER1_CTL_R |= 0x00000001;   // enable
 }
 
 // Initialize Timer2A for time-out interrupt
 // Inputs: time-out period
-// Outputs: none
 void Init_Sound(unsigned long period){
     unsigned long volatile delay;
-
     SYSCTL_RCGCTIMER_R |= 0x04;                             // activate clock for timer2A
     delay = SYSCTL_RCGCTIMER_R;                             // give time for clock to start
-
     TIMER2_CTL_R = 0x00000000;                              // disable timer2A
     TIMER2_CFG_R = 0x00000000;                              // 32-bit mode
     TIMER2_TAMR_R = 0x00000002;                             // periodic mode
@@ -112,19 +89,14 @@ void Init_Sound(unsigned long period){
     NVIC_PRI5_R = (NVIC_PRI5_R&0x00FFFFFF)|0x80000000;      // priority 4
     NVIC_EN0_R = 1<<23;                                     // enable IRQ 21
     TIMER2_CTL_R = 0x00000001;                              // enable timer2A
-
 }
 
 // Stop Timer2A
-// Inputs: none
-// Outputs: none
 void Sound_Stop(void){
   TIMER2_CTL_R &= ~0x00000001; // disable
 }
 
 // Start Timer2A
-// Inputs: none
-// Outputs: none
 void Sound_Start(void){
   TIMER2_CTL_R |= 0x00000001;   // enable
 }

@@ -8,16 +8,12 @@
 
 
 // Initialize system clock
-// Inputs: none
-// Outputs: none
 void Init_SysTick(void){
   NVIC_ST_CTRL_R = 0;                               // disable SysTick during setup
   NVIC_ST_CTRL_R = 0x00000005;                      // enable SysTick with core clock
 }
 
 // System clock time delay
-// Inputs: delay
-// Outputs: none
 void Wait_SysTick(unsigned long delay){
   NVIC_ST_RELOAD_R = delay-1;                       // number of counts to wait
   NVIC_ST_CURRENT_R = 0;                            // any value written to CURRENT clears
@@ -27,7 +23,6 @@ void Wait_SysTick(unsigned long delay){
 
 // Delay function based on the system clock
 // Inputs: delay in millisecs
-// Outputs: none
 void delayMS(unsigned long ms){
   unsigned long i;
   Init_SysTick();
@@ -38,25 +33,19 @@ void delayMS(unsigned long ms){
 
 
 // Initalizes PLL for 80Mhz
-// Inputs: none
-// Outputs: none
 void Init_PLL(void){
-    SYSCTL_RCC2_R |=  0x80000000;                   // use RCC2
-    SYSCTL_RCC2_R |=  0x00000800;                   // BYPASS2, PLL bypass
-    SYSCTL_RCC_R = (SYSCTL_RCC_R &~0x000007C0)      // clear XTAL field, bits 10-6
-                     + 0x00000540;                  // 10101, configure for 16 MHz crystal
-    SYSCTL_RCC2_R &= ~0x00000070;                   // configure for main oscillator source
-    SYSCTL_RCC2_R &= ~0x00002000;                   // activate PLL by clearing PWRDN
-    SYSCTL_RCC2_R |= 0x40000000;                    // use 400 MHz PLL
-    SYSCTL_RCC2_R = (SYSCTL_RCC2_R&~ 0x1FC00000)    // clear system clock divider
-                      + (4<<22);                    // configure for 80 MHz clock
-    while((SYSCTL_RIS_R&0x00000040)==0){};          // wait for PLLRIS bit
-    SYSCTL_RCC2_R &= ~0x00000800;                   // enable use of PLL by clearing BYPASS
+    SYSCTL_RCC2_R |=  0x80000000;                   			// use RCC2
+    SYSCTL_RCC2_R |=  0x00000800;                   			// BYPASS2, PLL bypass
+    SYSCTL_RCC_R = (SYSCTL_RCC_R &~0x000007C0) + 0x00000540;    // clear XTAL field, bits 10-6, 10101, configure for 16 MHz crystal
+    SYSCTL_RCC2_R &= ~0x00000070;                   			// configure for main oscillator source
+    SYSCTL_RCC2_R &= ~0x00002000;                   			// activate PLL by clearing PWRDN
+    SYSCTL_RCC2_R |= 0x40000000;                    			// use 400 MHz PLL
+    SYSCTL_RCC2_R = (SYSCTL_RCC2_R&~ 0x1FC00000) + (4<<22);     // clear system clock divider, configure for 80 MHz clock
+    while((SYSCTL_RIS_R&0x00000040)==0){};          			// wait for PLLRIS bit
+    SYSCTL_RCC2_R &= ~0x00000800;                   			// enable use of PLL by clearing BYPASS
 }
 
 // Port Initialisation
-// Inputs: none
-// Outputs: none
 void Init_Port(void) {
 	volatile unsigned long delay;
 	SYSCTL_RCGC2_R |= 0x0000001F;     					// activate clock for Port A, B, C, D, E
@@ -98,7 +87,6 @@ void Init_Port(void) {
 	GPIO_PORTD_DIR_R |= 0xFF;                           // output for PD 7-0
 	GPIO_PORTE_DIR_R  = 0x25;							// input for PE 1,3,4; output for PE 5,2,0
 
-
 	GPIO_PORTA_PUR_R |= 0x80;							// enable pull up resistor for PA 7
 	GPIO_PORTE_PUR_R |= 0x08;                           // enable pull up resistor for PE 3
 
@@ -110,8 +98,6 @@ void Init_Port(void) {
 }
 
 // Initalizes SSI0 at 2Mhz
-// Inputs: none
-// Outputs: none
 void Init_SSI0(void){
 	SSI0_CR1_R = 0x0;					// clear SSE bit
 	SSI0_CR1_R = 0x0;					// set SSI0 as master
@@ -121,13 +107,10 @@ void Init_SSI0(void){
 	SSI0_CR1_R |= 0x2;					// enable SSI
 }
 
-// Initalizes ADC0 - Sequencer 3
-// Inputs: none
-// Outputs: none
+// Initalizes ADC0 and ADC1 using sequencer 3
 void Init_Analog(void){
-	SYSCTL_RCGC0_R |= 0x00000A00;
-	//ADC0_PC_R = 0x5;  	    			//  analog sample speed: 500k
-	//ADC1_PC_R = 0x5;                    //    Value Description
+	SYSCTL_RCGC0_R |= 0x00000A00;  	    //  analog sample speed: 500k
+	                  	  	  	  	  	//  Value Description:
 	                                    //    0x7 1M samples/second
 	                                    //    0x5 500K samples/second
 	                                    //    0x3 250K samples/second
@@ -154,7 +137,6 @@ void Init_Analog(void){
 }
 
 // Busy-wait analog to digital conversion
-// Inputs: none
 // Outputs: 12-bit result of ADC conversion
 unsigned long ADC0(void){
   unsigned long result;
@@ -165,6 +147,8 @@ unsigned long ADC0(void){
   return result;
 }
 
+// Busy-wait analog to digital conversion
+// Outputs: 12-bit result of ADC conversion
 unsigned long ADC1(void){
   unsigned long result;
   ADC1_PSSI_R = 0x0008;                // 1) initiate SS3
@@ -176,8 +160,9 @@ unsigned long ADC1(void){
 
 
 // Initialize reading and writing of EEPROM
-// Inputs: none
-// Outputs: 0 if no error; 1 to retry initialisation, 2 if error has occured
+// Outputs: 0 if no error
+//			1 to retry initialisation
+//			2 if error has occured
 unsigned long Init_EEPROM(void){
     volatile unsigned long delay;
     unsigned long status;
@@ -203,17 +188,15 @@ unsigned long Init_EEPROM(void){
 
 }
 
-// Polls the status of EEDONE register to check if any EEPROM is performing any operations
-// Inputs: none
-// Outputs: none
+// Polls the status of EEDONE register to check if EEPROM is performing any operations
 void check_eeprom_done(void){
     while(EEPROM_EEDONE_R == 0x1){};
 }
 
 // Writes to a word in EEPROM
-// Inputs:data to be written
-// block and offset selects the location
-// Outputs: none
+// Inputs:	data to be written
+// 			block and offset selects the location
+
 void write_eeprom(unsigned char block, unsigned char offset, unsigned long *data){
     check_eeprom_done();                // check if EEPROM is idle first
     EEPROM_EEBLOCK_R = block;           // select block
@@ -236,7 +219,6 @@ unsigned long read_eeprom(unsigned char block, unsigned char offset){
 
 // Writes 0 to the selected location
 // Inputs: block and offset selects the location
-// Outputs: none
 void erase_eeprom(unsigned char block, unsigned char offset){
     check_eeprom_done();                // check if EEPROM is idle first
     EEPROM_EEBLOCK_R = block;          // select block 1
@@ -246,15 +228,12 @@ void erase_eeprom(unsigned char block, unsigned char offset){
 }
 
 // Loops while flash memory is performing any operations
-// Inputs: none
-// Outputs: none
 void check_flash_done(){
     while(((FLASH_FMC_R & 0x1) | (FLASH_FMC_R & 0x2) | (FLASH_FMC_R & 0x4) | (FLASH_FMC_R & 0x8))){};
 }
 
 // Write a single 32-bit word to flash memory
 // Inputs: data and address of location
-// Outputs: none
 void write_flash(unsigned long *data, unsigned long address){
     FLASH_FMD_R = *data;											// write the data to FMD register
     FLASH_FMA_R = address&0x3FFFF;									// write the target address to FMA register
@@ -265,7 +244,6 @@ void write_flash(unsigned long *data, unsigned long address){
 // Write 32 words with a single buffered flash memory write operation
 // Inputs: data and address of location
 // offset selects one of the 32 registers in the write buffer
-// Outputs: none
 void write_flash_buffer(unsigned long *data,unsigned long address, unsigned char offset){
     volatile unsigned long *reg = ((volatile unsigned long *)0x400FD100);
     reg[offset] = *data;												// offset selects one of the 32 registers in flash write buffer
@@ -277,14 +255,11 @@ void write_flash_buffer(unsigned long *data,unsigned long address, unsigned char
 
 // Setup the base address of the DMA controller
 // Inputs: base address for DMA control table must be 1024 bytes alligned
-// Outputs: none
 void Set_DMA_Base_Address(unsigned long address){
 	UDMA_CTLBASE_R = address;
 }
 
 // Initialize DMA - select channel 30 for software trigger
-// Inputs: none
-// Outputs: none
 void Init_DMA(void){
 	SYSCTL_RCGCDMA_R = 0x1;							// enable DMA clock
 	UDMA_CFG_R = 0x1;								// enable DMA controller
@@ -296,8 +271,10 @@ void Init_DMA(void){
 }
 
 // Configure the DMA channel
-// Inputs: channel , source address, destination address, and 32 bit control word (see page 609 in mcu datasheet)
-// Outputs: none
+// Inputs:  channel
+//			source end address
+//			destination end address
+//			32 bit control word (see page 609 in mcu datasheet)
 void config_DMA_channel(unsigned char channel,unsigned long source, unsigned long destination, unsigned long control_word){
 	volatile unsigned long *base = ((volatile unsigned long *)UDMA_CTLBASE_R);							// get address of control table base
 	unsigned short s_pointer = channel*16;				// calculate offset for source end pointer
@@ -308,9 +285,7 @@ void config_DMA_channel(unsigned char channel,unsigned long source, unsigned lon
 	base[c_word/4] = control_word;						// set control word
 }
 
-// Begin DMA transfer
-// Inputs: none
-// Outputs: none
+// Begin DMA transfer on channel 30
 void start_DMA_transfer(void){
 	UDMA_ENASET_R |= 0x40000000;					// enable channel 30
 	UDMA_SWREQ_R |= 0x40000000;						// issue transfer request for channel 30

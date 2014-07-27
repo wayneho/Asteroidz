@@ -4,9 +4,6 @@
 #include "math.h"
 #include "interrupts.h"
 
-int testvaluex;
-int testvaluey;
-
 int main(void)
 {
     int EEPROM_Status;
@@ -23,36 +20,31 @@ int main(void)
 	retry:
 	EEPROM_Status = Init_EEPROM();
 	switch(EEPROM_Status){
-	case 0:                                 // no errors
+	case 0:                     // no errors
 	    break;
 	case 1:
-	    goto retry;                         //retry initilization
+	    goto retry;             // retry initilization
 	default:
-	    while(1){};                         // error enter infinite loop
+	    while(1){};             // error enter infinite loop
 	}
 
 	// game setup
 	clearLCD(white);
-	Init_Timer0A(20000000);     // 80000000*12.5ns = 1s
-	Init_Timer1A(80000000);
-	//Init_Player();
+	Init_Timer0A(20000000);     // this timer controls asteroid spawn rate (20000000*12.5ns = 0.25s
+	Init_Timer1A(80000000);		// this timer controls the game timer (80000000*12.5ns = 1s)-+
     Init_Explosions();
     Init_PowerUp();
     Init_StartScreen();
 
-    //config_DMA_channel(30,0x20000063, 0x20005000,0x0003C632);		// 8 bit increment , no arbitration
-    //start_DMA_transfer();
-
 	while(1)
 	{
-
-	    if (start)                                          // start game after screen has been touched
+	    if (start)
 	    {
 	        if(reset == 1){
-	            delayMS(200);                               // delay needed for touchscreen interrupt to settle
+	            delayMS(200);   // delay needed for touchscreen interrupt to settle
 	            reset = 0;
 	            resetGame();
-	            //displayCountDown();
+	            displayCountDown();
 	            Asteroid_Start();
 	            Distance_Start();
 
@@ -61,13 +53,10 @@ int main(void)
 	        }
 	        else
 	        {
-	        	testvaluex = ADC0();
-	        	testvaluey = ADC1();
-	        	displayScore();
-	        	detectPlayerCollision();
+	        	displayTime();
 	        	shieldStatus();
-                playerControl(ADC0(), ADC1());                  // move player according to slide pot value
-                //moveLaser();
+	        	detectPlayerCollision();
+                playerControl(ADC0(), ADC1());
                 deployAsteroid();
                 moveAsteroid();
                 movePowerUp();

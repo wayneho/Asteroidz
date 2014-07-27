@@ -24,9 +24,9 @@ void writeReg(unsigned short cmd,unsigned short data);
 
 // helper functions
 void clearLCD(unsigned short rgb);                                                                                  //set entire LCD to the color rgb
-void clearArea(unsigned short x1, unsigned short y1,unsigned short x2,unsigned short y2, unsigned short color);     // erase an area on the LCD
+void clearArea(unsigned short x1, unsigned short y1,unsigned short x2,unsigned short y2, unsigned short rgb);       //erase an area on the LCD
 void setCursor(unsigned short x,unsigned short y);                                                                  //set current pixel to x,y
-void setWindow(unsigned short x1,unsigned short y1,unsigned short x2,unsigned short y2);                           // set an address range
+void setWindow(unsigned short x1,unsigned short y1,unsigned short x2,unsigned short y2);                            //set address window
 
 
 // touchscreen functions

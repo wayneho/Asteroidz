@@ -29,8 +29,6 @@ unsigned int TS_Y;
 
 
 // Initialisation sequence to start LCD
-// Inputs: none
-// Outputs: none
 void Init_LCD(void)
 {
 	
@@ -96,7 +94,6 @@ void Init_LCD(void)
 
 // writes a command to the databus
 // Inputs: 16bit command
-// Outputs: none
 void writeCmd(unsigned short cmd){
 	LCD_RS = 0x00;
 	LCD_CS = 0x00;
@@ -112,7 +109,6 @@ void writeCmd(unsigned short cmd){
 }
 // writes data to the databus
 // Inputs: 16bit data
-// Outputs: none
 void writeData(unsigned short data){
 	LCD_RS = 0xFF;
 	LCD_CS = 0x00;
@@ -129,7 +125,6 @@ void writeData(unsigned short data){
 
 // comebines writeCmd and writeDat
 // Inputs: command and data
-// Outputs: none
 void writeReg(unsigned short cmd,unsigned short data)
 {
 	writeCmd(cmd);
@@ -138,7 +133,6 @@ void writeReg(unsigned short cmd,unsigned short data)
 
 // Sets the beginning address in the graphics display data ram (GDDRAM)
 // Inputs: x1,y1
-// Outputs: none
 void setCursor(unsigned short x,unsigned short y)
 {
 	writeReg(0x004E, x);
@@ -147,7 +141,6 @@ void setCursor(unsigned short x,unsigned short y)
 
 // Sets the address window in the GDDRAM
 // Inputs: x1,y1,x2,y2 coordinates
-// Outputs: none
 void setWindow(unsigned short x1,unsigned short y1,unsigned short x2,unsigned short y2)
 {
     writeReg(0x0044,(x2<<8)+x1);
@@ -159,7 +152,6 @@ void setWindow(unsigned short x1,unsigned short y1,unsigned short x2,unsigned sh
 
 // Clears the entire LCD screen
 // Inputs: color of background
-// Outputs: none
 void clearLCD(unsigned short rgb)
 {
 	unsigned int i;
@@ -173,8 +165,7 @@ void clearLCD(unsigned short rgb)
 
 // Clears a certain area on the LCD screen
 // Inputs: x1,y1,x2,y2 coordinates and color of area to be cleared
-// Outputs: none
-void clearArea(unsigned short x1, unsigned short y1,unsigned short x2,unsigned short y2, unsigned short color)
+void clearArea(unsigned short x1, unsigned short y1,unsigned short x2,unsigned short y2, unsigned short rgb)
 {
     unsigned int i;
     unsigned short dx, dy;
@@ -184,12 +175,11 @@ void clearArea(unsigned short x1, unsigned short y1,unsigned short x2,unsigned s
     writeCmd(0x0022);
     for(i = 0; i < (dx*dy); i++)
     {
-       writeData(color);
+       writeData(rgb);
     }
 }
 
 // Requests the x coordinate from the touchscreen controller
-// Inputs: none
 // Outputs: 12-bit conversion
 unsigned long getX(void){
 	unsigned int coordinate = 0;
@@ -206,7 +196,6 @@ unsigned long getX(void){
 }
 
 // Requests the y coordinate from the touchscreen controller
-// Inputs: none
 // Outputs: 12-bit ADC conversion
 unsigned long getY(void){
 	unsigned int coordinate = 0;

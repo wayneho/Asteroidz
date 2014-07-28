@@ -1,3 +1,3 @@
-Astroidz
+Asteroidz
 ========
 hello

@@ -609,7 +609,7 @@ void Touchscreen_Handler(void){
     reset = 1;
 }
 
-// Timer0 interrupt. Spawns an asteroid with timer times out
+// Timer0 interrupt. Spawns an asteroid when timer times out
 void Asteroid_Handler(void){
 	int i;
 	TIMER0_ICR_R = 0x00000001;  // clear interrupt flag

@@ -36,12 +36,12 @@ void Init_Timer0A(unsigned long period){
 }
 
 // Stop Timer0A
-void Asteroid_Stop(void){
+void Asteroid_Timer_Stop(void){
   TIMER0_CTL_R &= ~0x00000001; // disable
 }
 
 // Start Timer0A
-void Asteroid_Start(void){
+void Asteroid_Timer_Start(void){
   TIMER0_CTL_R |= 0x00000001;   // enable
 }
 
@@ -64,12 +64,12 @@ void Init_Timer1A(unsigned long period){
 }
 
 // Stop Timer1A
-void Distance_Stop(void){
+void Distance_Timer_Stop(void){
   TIMER1_CTL_R &= ~0x00000001; // disable
 }
 
 // Start Timer1A
-void Distance_Start(void){
+void Distance_Timer_Start(void){
   TIMER1_CTL_R |= 0x00000001;   // enable
 }
 
@@ -92,12 +92,12 @@ void Init_Sound(unsigned long period){
 }
 
 // Stop Timer2A
-void Sound_Stop(void){
+void Sound_Timer_Stop(void){
   TIMER2_CTL_R &= ~0x00000001; // disable
 }
 
 // Start Timer2A
-void Sound_Start(void){
+void Sound_Timer_Start(void){
   TIMER2_CTL_R |= 0x00000001;   // enable
 }
 

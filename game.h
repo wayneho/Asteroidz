@@ -26,10 +26,13 @@ typedef struct{
 } State;
 
 
-//  This struct inherits from the struct State and tells whether the player has acquired an item
+//  This struct inherits from the struct State
+//  item: 0 = no items; 1 = shield
+//	mode: 0 = default game mode; 1 = bonus mode
 typedef struct {
     State state;
-    bool item;
+    unsigned char item;
+    unsigned char mode;
 
 } Player;
 
@@ -44,6 +47,7 @@ typedef struct{
 extern State explosion[];
 extern Asteroid asteroid[];
 extern Player player;
+extern State laser[];
 
 // player functions
 void Init_Player(void);
@@ -51,6 +55,7 @@ void playerControl(unsigned int x, unsigned int y);
 void getPlayerPosition(unsigned int);
 
 // asteroid functions
+void Init_Asteroids(void);
 void deployAsteroid(void);                              // animation for astroids entering the LCD
 void addAsteroidMedium(unsigned short index);
 void deleteAsteroid(unsigned short index);
@@ -64,7 +69,8 @@ void Init_Explosions(void);
 void Init_PowerUp(void);
 void spawnPowerUp(unsigned char index);
 void movePowerUp(void);
-void shieldStatus(void);
+void PowerUp_Status(void);
+
 
 
 // functions to display images and animations
@@ -94,6 +100,8 @@ void resetGame(void);
 void loopEndGame(void);
 void write_highscore(unsigned long score);
 unsigned long read_highscore(void);
+void level_two(void);
+void level_one(void);
 
 // Interrupt handlers
 void Asteroid_Handler(void);

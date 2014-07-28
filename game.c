@@ -11,13 +11,14 @@
 
 #define DAC         (*((volatile unsigned long *)0x400063C0))           // 4 bit weighted resistor DAC; PC 7-4
 
-static char N = 6;            // number of asteroids on the screen at a time (too many will cause lag)
+static char N = 5;            // number of asteroids on the screen at a time (too many will cause lag)
 static char M = 1;            // speed at which asteroids travel
 static unsigned long shield_timer;
+static unsigned long star_timer;
 static const unsigned char SineWave[30] = {8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7};        // annoying noise
 static unsigned char Index;
 unsigned char reset = 1;
-unsigned char start;                               //flag to start game after screen has been touched
+unsigned char start;                               		  //flag to start game after screen has been touched
 static unsigned long TimerCount;                          //counter for time travelled
 static unsigned long game_score;
 
@@ -25,7 +26,7 @@ static unsigned long game_score;
 Player player;
 State explosion[4];
 State powerup[2];
-Asteroid asteroid[6];
+Asteroid asteroid[5];
 
 
 
@@ -40,7 +41,8 @@ void Init_Player(void){
     player.state.width = SPACESHIPWIDTH;
     player.state.height = SPACESHIPHEIGHT;
     player.state.life = 1;
-    player.item = false;
+    player.item = 0;
+    player.mode = 0;
     setWindow(player.state.x1,player.state.y1,player.state.x2,player.state.y2);
     printBMP(&player.state);
 }
@@ -66,27 +68,13 @@ void Init_Explosions(void){
 }
 
 
-// Displays the starting image
-void Init_StartScreen(void)
-{
-    int i ;
-    //int palette_index;
-    setWindow(0,0,239,319);
-    writeCmd(0x0022);
-    for(i = 0; i < 76800; i++)
-    {
-        //palette_index = startImage[i];
-        //writeData(colorPalette[palette_index]);
-    }
-}
-
 // Displays the time travelled after player has crashed
 void displayEndScreen(void){
     unsigned long highscore;
     unsigned long num;
 
-    Distance_Stop();                                     // stop distance counter
-    Asteroid_Stop();
+    Distance_Timer_Stop();                                     // stop distance counter
+    Asteroid_Timer_Stop();
     num = game_score;
     highscore = read_highscore();
 
@@ -113,21 +101,21 @@ void displayEndScreen(void){
 // Score display commented out to speed up system
 void displayTime(void){
 	unsigned long score, time;
-    //char words2[] = {"SCORE: "};
     //char words[] = {"TIME: "};
+	//char words2[] = {"SCORE: "};
 	char buffer[10];
 	char buffer2[10];
 
 	score = game_score;
 	time = TimerCount;
 
-	sprintf(buffer, "%i", score);
-	sprintf(buffer2, "%i", time);
+	sprintf(buffer, "%i", time);
+	sprintf(buffer2, "%i", score);
 
     //writeString(words, 0, 1, red, white);
     //writeString(words2, 0,10, red, white);
-	//writeString(buffer, 43,1, red, white);
-	writeString(buffer2, 0,1, red, white);
+	writeString(buffer, 0,1, red, white);
+	writeString(buffer2, 0,10, red, white);
 
 }
 
@@ -203,7 +191,7 @@ void printBMP2(State *sprite){
 void playerControl(unsigned int x, unsigned int y){
 
 	// player is traveling in the x direction
-	if(player.state.x1 < 199){
+	if(player.state.x1 < 207){
 		if(x >= 2150 && x < 3596){
 			player.state.x1 = player.state.x1 + 1;
 			player.state.x2 = player.state.x2 + 1;
@@ -250,14 +238,34 @@ void playerControl(unsigned int x, unsigned int y){
 
 }
 
-// Shield expires after 3 seconds
-// Change image of player sprite and negate 1 life
-void shieldStatus(void){
+// Function to check if player has used shield item or acquired the star PowerUp
+// Shield item expires after 3 seconds and star PowerUp expires after 5 seconds
+// At 4 seconds the coins start to fade to indicate star PowerUp expiring
+void PowerUp_Status(void){
+	int i;
+
 	if(player.state.image == invulnerable_spaceship){
 		if(TimerCount >= shield_timer+3){
 			player.state.life -= 1;
 			player.state.image = spaceshipImage;
 		}
+	}
+
+	if(player.mode == 1){
+		if(TimerCount >= star_timer+5){
+			for(i = 0;i<N;i++){
+				asteroid[i].state.image = asteroidm;
+			}
+			player.mode = 0;
+		}
+		if(TimerCount > star_timer+3 && TimerCount < star_timer+5){
+			for(i = 0;i<N;i++){
+				asteroid[i].state.image = coin_fade_image;
+			}
+		}
+	}
+	else{
+		asteroid[i].state.image = asteroidm;
 	}
 
 }
@@ -296,6 +304,9 @@ void deployAsteroid(void){
              }
             else
             {
+            	if(asteroid[i].row == M && M >= 2){
+            		clearArea(asteroid[i].state.x1,0,asteroid[i].state.x2,M, white);
+            	}
             	asteroid[i].state.y1 = (y_end - asteroid[i].state.height);
             }
         }
@@ -323,7 +334,6 @@ void moveAsteroid(void){
                 {
                     asteroid[i].state.y1 = asteroid[i].state.y1 + M;
                     asteroid[i].state.y2 = asteroid[i].state.y2 + M;
-                    //clearArea(asteroid[i].state.x1, asteroid[i].state.y1-M, asteroid[i].state.x2 , asteroid[i].state.y1+1, white);
                     setWindow(asteroid[i].state.x1,asteroid[i].state.y1,asteroid[i].state.x2,asteroid[i].state.y2);
                     printBMP(&asteroid[i].state);
 
@@ -343,19 +353,26 @@ void deleteSprite(State *sprite){
 	sprite->y2 = 340;
 }
 
+void Init_Asteroids(void){
+	int i;
+	for(i=0;i<N;i++){
+	    asteroid[i].state.life = 0;
+	    asteroid[i].state.imageSize = ASTEROIDBMP_M;
+	    asteroid[i].state.height = ASTEROIDHEIGHT_M;
+	    asteroid[i].state.width = ASTEROIDWIDTH_M;
+	    asteroid[i].state.image = asteroidm;
+	}
+}
+
 // Creates new astroid starting at a random x location
 // Inputs: index of Asteriod struct array with life = 0
-void addAsteroidMedium(unsigned short index){
-    asteroid[index].state.x1 = randomValue(219);
-    asteroid[index].state.x2 = asteroid[index].state.x1 + (ASTEROIDWIDTH_M-1);
-    asteroid[index].state.y1 = 0;
-    asteroid[index].state.y2 = M;
-    asteroid[index].state.life = 1;
-    asteroid[index].row = ASTEROIDHEIGHT_M;
-    asteroid[index].state.imageSize = ASTEROIDBMP_M;
-    asteroid[index].state.image = asteroidm;
-    asteroid[index].state.height = ASTEROIDHEIGHT_M;
-    asteroid[index].state.width = ASTEROIDWIDTH_M;
+void addAsteroidMedium(unsigned short i){
+    asteroid[i].state.x1 = randomValue(219);
+    asteroid[i].state.x2 = asteroid[i].state.x1 + (ASTEROIDWIDTH_M-1);
+    asteroid[i].state.y1 = 0;
+    asteroid[i].state.y2 = M;
+    asteroid[i].state.life = 1;
+    asteroid[i].row = ASTEROIDHEIGHT_M;
 }
 
 
@@ -413,16 +430,26 @@ bool collision(State *A, State *B)
 
 // Check if player has collided with another an asteroid or a PowerUp
 // If player has collided with an asteroid display explosion animations
-// If player has collided with a PowerUp, figure out which one and perform the necessary functions
+// If player has collided with a coin add 1 to player score
+// If player has collided with a shield PowerUp then give player shield item
+// If player has collided with a bonus points PowerUp then give add 3 to player score
+// If player has collided with a star PowerUp then turn all asteriods into stars
 void detectPlayerCollision(void){
     int i;
     for(i=0;i<N; i++)
     {
         if(collision(&player.state, &asteroid[i].state)){
-        	player.state.image = spaceshipImage;
-        	player.state.life = player.state.life-1;
         	clearArea(asteroid[i].state.x1, asteroid[i].state.y1, asteroid[i].state.x2 , asteroid[i].state.y2, white);
         	deleteSprite(&asteroid[i].state);
+
+        	if(asteroid[i].state.image == asteroidm){
+            	player.state.image = spaceshipImage;
+            	player.state.life = player.state.life-1;
+        	}
+        	else{
+        		game_score += 1;
+        	}
+
         	if(player.state.life == 0){
         		loopEndGame();
         		return;
@@ -435,10 +462,18 @@ void detectPlayerCollision(void){
     	if(collision(&powerup[i], &player.state)){
     		if(powerup[i].life == 1){
     			powerup[i].life = powerup[i].life-1;
-				player.item = true;
 				clearArea(powerup[i].x1,powerup[i].y1,powerup[i].x2,powerup[i].y2, white);
+
 				if(powerup[i].image == powerup_shield_image){
 					player.state.image = spaceship_item_acquired;
+					player.item = 1;
+				}
+				else if(powerup[i].image == powerup_star_image){
+					star_timer = TimerCount;
+					player.mode = 1;
+					for(i = 0;i<N;i++){
+						asteroid[i].state.image = coin_image;
+					}
 				}
 				else{
 					game_score+=3;
@@ -451,7 +486,7 @@ void detectPlayerCollision(void){
 // Display explosion animation continuously
 void loopEndGame(void){
     displayEndScreen();
-    while(player.state.life == 0){
+    while(reset == 0){
         displayExplosionAnimation(player.state.center_x,player.state.center_y);
         playSound();
     }
@@ -459,6 +494,7 @@ void loopEndGame(void){
 
 
 // Plays sound that alternates between 440Hz and 330Hz
+// ex. calculation:  80Mhz / 440Hz /30 = ~6061
 void playSound(void){
     static char note = 0;
     if(note == 0){
@@ -487,6 +523,7 @@ void displayCountDown(void){
         delayMS(1000);
         }
     }
+    clearLCD(white);
 }
 
 // Generates a random value using the value from ADC0() as seed
@@ -546,14 +583,14 @@ void GPIOPortA_Handler(void){
     delayMS(5);                // debounce switch
     if(SW0 == 0)
     {
-    	if(player.item == true){
+    	if(player.item == 1){
     		if(player.state.image == spaceship_item_acquired)
     		{
 				player.state.life += 1;
 				player.state.image = invulnerable_spaceship;
 				shield_timer = TimerCount;
     		}
-			player.item = false;
+			player.item = 0;
     	}
 
     	if(player.state.life == 0){
@@ -568,25 +605,24 @@ void GPIOPortA_Handler(void){
 // Priority level 5
 void Touchscreen_Handler(void){
     GPIO_PORTE_ICR_R = 0x08;    // clear interrupt flag
-    reset = 1;
     start = 1;
-    player.state.life = 1;
-
+    reset = 1;
 }
 
 // Timer0 interrupt. Spawns an asteroid with timer times out
 void Asteroid_Handler(void){
-  int i;
-  TIMER0_ICR_R = 0x00000001;  // clear interrupt flag
-  for(i = 0; i < N; i++)
-  {
-      if(asteroid[i].state.life == 0)
-      {
-          addAsteroidMedium(i);
-          return;                   // found open slot for new asteroid
-      }
+	int i;
+	TIMER0_ICR_R = 0x00000001;  // clear interrupt flag
+	for(i = 0; i < N; i++)
+	{
+	  if(asteroid[i].state.life == 0)
+	  {
+		  addAsteroidMedium(i);
+		  return;                   // found open slot for new asteroid
+	  }
 
-  }
+	}
+
 }
 
 // Timer1 interrupt.  Keeps track of time traveled and spawns powerups randomly
@@ -597,8 +633,10 @@ void Distance_Handler(void){
 	TIMER1_ICR_R = 0x00000001;  // clear interrupt flag
 	TimerCount++;
 	game_score++;
-	if(TimerCount >= 20){
-		M = 2;						// increase asteroid speed
+
+	if(TimerCount == 20){
+		level_two();
+		return;
 	}
 	if(randomValue(5) == 5){
 	  for(i=0;i<2;i++){
@@ -629,6 +667,7 @@ void resetGame(void){
     TimerCount = 0;
     game_score = 0;
     Index = 0;
+    reset = 0;
     M = 1;
 
     for(i = 0;i < N;i++){
@@ -638,6 +677,8 @@ void resetGame(void){
     for(i = 0; i < 2;i++){
     	deleteSprite(&powerup[i]);
     }
+    level_one();
+    Init_Player();
 }
 
 // Function to setup the PowerUp image sizes
@@ -653,37 +694,51 @@ void Init_PowerUp(void){
 		powerup[i].imageSize = POWERUP_BMP;
 	}
 }
-// Function to spawn power ups.  The score+3 powerup spawns more frequently than the shield powerup
-// If player is already holding the shield powerup then it will only spawn score+3
+// Function to spawn power ups.  The points powerup spawns more frequently than the shield powerup.  The star powerup is the most rare.
+// If player is already holding the shield powerup then only the other powerups will spawn
 // Input: index into powerup struct array
-void spawnPowerUp(unsigned char index){
-	powerup[index].x1 = randomValue(209);
-	powerup[index].x2 = powerup[index].x1 + (POWERUP_WIDTH -1);
-	powerup[index].y1 = 0;
-	powerup[index].y2 = powerup[index].y1 + (POWERUP_HEIGHT-1);
-	powerup[index].life = 1;
+void spawnPowerUp(unsigned char i){
+	int random_num;
+	powerup[i].x1 = randomValue(209);
+	powerup[i].x2 = powerup[i].x1 + (POWERUP_WIDTH -1);
+	powerup[i].y1 = 0;
+	powerup[i].y2 = powerup[i].y1 + (POWERUP_HEIGHT-1);
+	powerup[i].life = 1;
 
-	if(randomValue(3) == 0){
-		if(player.state.image == spaceship_item_acquired || player.state.image == invulnerable_spaceship){						// if player already has shield item
-			powerup[index].image = image_data_bonus;
+	retry:
+	random_num = randomValue(5);
+
+	if(random_num == 0 || random_num == 1){
+		// if player already has shield item then get new random number
+		if(player.state.image == spaceship_item_acquired || player.state.image == invulnerable_spaceship){
+			goto retry;
 		}
 		else{
-			powerup[index].image = powerup_shield_image;
+			powerup[i].image = powerup_shield_image;
 		}
 	}
+	else if(random_num == 2){
+		powerup[i].image = powerup_star_image;
+	}
 	else{
-		powerup[index].image = image_data_bonus;
+		powerup[i].image = powerup_points_image;
 	}
 }
-// Moves PowerUps down the screen by one pixel
+// Moves PowerUps down the screen by one pixel.  The star PowerUp moves quicker than the others
 // If PowerUp is outside the screen display set its life to 0
 void movePowerUp(void){
 	int i;
 	for(i=0;i<2;i++){
 		if(powerup[i].life == 1){
 			if(powerup[i].y1 < 320){
-				powerup[i].y1 = powerup[i].y1 + 1;
-				powerup[i].y2 = powerup[i].y2 + 1;
+				if(powerup[i].image == powerup_star_image){
+					powerup[i].y1 = powerup[i].y1 + 2;
+					powerup[i].y2 = powerup[i].y2 + 2;
+				}
+				else{
+					powerup[i].y1 = powerup[i].y1 + 1;
+					powerup[i].y2 = powerup[i].y2 + 1;
+				}
 				setWindow(powerup[i].x1,powerup[i].y1,powerup[i].x2,powerup[i].y2);
 				printBMP(&powerup[i]);
 			}
@@ -693,3 +748,54 @@ void movePowerUp(void){
 		}
 	}
 }
+
+// Displays the title of the game
+void Init_StartScreen(void)
+{
+    int i;
+
+    setWindow(5, 140, 234, 182);
+    writeCmd(0x0022);
+    for(i = 0; i < 9890; i++)
+    {
+        writeData(start_image[i]);
+    }
+}
+// Displays the string "LEVEL 2" and a count down to begin the level
+// Resets all powerups and asteroids
+void level_two(void){
+	int i;
+	char word[] = {"LEVEL 2"};
+	Asteroid_Timer_Stop();
+	Distance_Timer_Stop();
+	clearLCD(white);
+
+    writeString(word, 100, 160, red, white);
+    delayMS(1000);
+    displayCountDown();
+	M = 2;									// increase asteroid speed
+
+    for(i = 0;i < N;i++){
+        deleteSprite(&asteroid[i].state);
+        asteroid[i].state.image = asteroidm;
+    }
+
+    for(i = 0; i < 2;i++){
+    	deleteSprite(&powerup[i]);
+    }
+    star_timer = TimerCount;
+    Init_Player();
+
+    Asteroid_Timer_Start();
+    Distance_Timer_Start();
+}
+
+// Displays the string "LEVEL 1" and a count down to begin the level
+void level_one(void){
+	char word[] = {"LEVEL 1"};
+	clearLCD(white);
+	writeString(word, 100, 160, red, white);
+	delayMS(1000);
+	displayCountDown();
+}
+

@@ -8,6 +8,7 @@ Created by: Wayne Ho - July 27, 2014
  	frequent and it turns all the asteroids in the next 5 seconds into coins which can be picked up to add 1 point to the player's score.  After 4
     seconds of picking up the star power up, the coin sprite changes to a faded red color to indicate that the coins are about to change back to asteroids.  As the game
     progresses the asteroids move faster indicated by the level you are on (currently there are only 2 levels).
+    https://www.youtube.com/watch?v=DcXUXEgC4xE&list=UUe71GvrYlGx_wBIjqkTueFg
  
  	The game is using:
  		- two 12 bit ADCs to control the player's x and y movement

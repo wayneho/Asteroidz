@@ -17,7 +17,7 @@ Created by: Wayne Ho - July 27, 2014
  			- one to create sound
  		- two GPIO Interrupts:
  			- PE3 is connected to the touch screen and starts or resets the game
- 			- PA7 is connected to a switch and activates the player shield item or resets the highscore (when in the end screen menu)
+ 			- PA7 is connected to a button and activates the player shield item or resets the highscore (when in the end screen menu)
  		- EEPROM to store player highscore
  
  

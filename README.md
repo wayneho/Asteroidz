@@ -2,11 +2,11 @@ Asteroidz
 ========
 Created by: Wayne Ho - July 27, 2014
  
- 	The object of this game is to travel as far as possible while dodging asteroids along the way.  There are 3 power ups that spawn randomly.
- 	The points power up spawns the most often and when picked up adds 3 points to the player score.  The shield power up allows the player to become
- 	invulnerable once activated until it is popped.  If it is not popped after 3 seconds then it disappears .  The star power up spawns the least
+ 	The object of this game is to travel as far as possible while avoiding asteroids.  There are 3 power-ups that spawn randomly.
+ 	The points power-up spawns most often and when picked up adds 3 points to the player's score.  The shield power-up allows the player to become
+ 	invulnerable once activated by clicking the joystick.  The shield disappears after 3 seconds if it is not popped (by crashing into an asteroid).  The star power-up spawns the least
  	frequent and it turns all the asteroids in the next 5 seconds into coins which can be picked up to add 1 point to the player's score.  After 4
-    seconds of picking up the star power up, the coin sprite changes to a faded red color to indicate that it is about to expire.  As the game
+    seconds of picking up the star power up, the coin sprite changes to a faded red color to indicate that the coins are about to change back to asteroids.  As the game
     progresses the asteroids move faster indicated by the level you are on (currently there are only 2 levels).
  
  	The game is using:

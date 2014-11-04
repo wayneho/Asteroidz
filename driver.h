@@ -24,7 +24,7 @@ unsigned long ADC1(void);
 
 //EEPROM functions
 void check_eeprom_done(void);
-void write_eeprom(unsigned char block, unsigned char offset, unsigned long *data);
+void write_eeprom(unsigned char block, unsigned char offset, unsigned int *data);
 unsigned long read_eeprom(unsigned char block, unsigned char offset);
 void erase_eeprom(unsigned char block, unsigned char offset);
 

@@ -6,8 +6,8 @@
 #define FB_BASE         0x00020000        // frame buffer located at address 0x00020000 - 0x00032BFF
 #define FB_SIZE         76800
 
-extern unsigned char start;                               //flag to start game after screen has been touched
-extern unsigned char reset;
+extern volatile unsigned char start;                               //flag to start game after screen has been touched
+extern volatile unsigned char reset;
 
 //  This struct holds variables for object information such as:
 //  coordinates, life, sprite image, etc..
@@ -98,7 +98,7 @@ unsigned short randomValue(unsigned char range);
 void getCenter(State *sprite);
 void resetGame(void);
 void loopEndGame(void);
-void write_highscore(unsigned long score);
+void write_highscore(unsigned int score);
 unsigned long read_highscore(void);
 void level_two(void);
 void level_one(void);

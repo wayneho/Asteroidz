@@ -13,14 +13,14 @@
 
 static char N = 5;            // number of asteroids on the screen at a time (too many will cause lag)
 static char M = 1;            // speed at which asteroids travel
-static unsigned long shield_timer;
-static unsigned long star_timer;
+static unsigned int shield_timer;
+static unsigned int star_timer;
 static const unsigned char SineWave[30] = {8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7};        // annoying noise
 static unsigned char Index;
-unsigned char reset = 1;
-unsigned char start;                               		  //flag to start game after screen has been touched
-static unsigned long TimerCount;                          //counter for time travelled
-static unsigned long game_score;
+volatile unsigned char reset = 1;
+volatile unsigned char start;                               		  //flag to start game after screen has been touched
+static unsigned int TimerCount;                          //counter for time travelled
+static unsigned int game_score;
 
 
 Player player;
@@ -70,8 +70,8 @@ void Init_Explosions(void){
 
 // Displays the time travelled after player has crashed
 void displayEndScreen(void){
-    unsigned long highscore;
-    unsigned long num;
+    unsigned int highscore;
+    unsigned int num;
 
     Distance_Timer_Stop();                                     // stop distance counter
     Asteroid_Timer_Stop();
@@ -121,7 +121,7 @@ void displayTime(void){
 
 // Writes the new high score into EEPROM
 // Inputs: 32bit word
-void write_highscore(unsigned long score){
+void write_highscore(unsigned int score){
     write_eeprom(0x2,0x0,&score);                   // block 1, offset 0
 }
 
@@ -142,7 +142,7 @@ void getCenter(State *sprite)
 
 // Prints the image of a sprite
 // Inputs: Sprite
-void printBMP(State *sprite){
+__inline void printBMP(State *sprite){
     int i;
     writeCmd(0x0022);
     for(i=0;i<sprite->imageSize;i++)
@@ -265,7 +265,12 @@ void PowerUp_Status(void){
 		}
 	}
 	else{
-		asteroid[i].state.image = asteroidm;
+		asteroid[0].state.image = asteroidm;
+		asteroid[1].state.image = asteroidm;
+		asteroid[2].state.image = asteroidm;
+		asteroid[3].state.image = asteroidm;
+		asteroid[4].state.image = asteroidm;
+
 	}
 
 }
@@ -273,9 +278,9 @@ void PowerUp_Status(void){
 // Function to animate an asteroid entering the LCD
 // Draws an asteroid bitmap 'M' rows at a time depending on asteroid speed until it has fully entered the screen
 void deployAsteroid(void){
-    char i;
+    int i;
     int j;
-    unsigned short x_start, x_end,y_start, y_end, row;
+    unsigned int x_start, x_end,y_start, y_end, row;
 
 
     for(i = 0; i < N; i++)
@@ -319,7 +324,7 @@ void deployAsteroid(void){
 // Moves the asteroid vertically down by M pixel(s)
 // Set life of the asteroid to 0 if it has gone outside the screen resolution
 void moveAsteroid(void){
-    char i;
+    int i;
     for(i=0; i < N; i++)
     {
         if(asteroid[i].state.life == 1)
@@ -342,6 +347,97 @@ void moveAsteroid(void){
         }
     }
 }
+
+/*void moveAsteroid(void){
+
+	if(asteroid[0].state.life == 1)
+	{
+		if(asteroid[0].row <= M)        // asteroid deploying animation finished
+		{
+			if(asteroid[0].state.y1 >= 320)
+			{
+				asteroid[0].state.life = 0;
+			}
+			else
+			{
+				asteroid[0].state.y1 = asteroid[0].state.y1 + M;
+				asteroid[0].state.y2 = asteroid[0].state.y2 + M;
+				setWindow(asteroid[0].state.x1,asteroid[0].state.y1,asteroid[0].state.x2,asteroid[0].state.y2);
+				printBMP(&asteroid[0].state);
+
+			}
+		}
+	}
+	if(asteroid[1].state.life == 1)
+	{
+		if(asteroid[1].row <= M)        // asteroid deploying animation finished
+		{
+			if(asteroid[1].state.y1 >= 320)
+			{
+				asteroid[1].state.life = 0;
+			}
+			else
+			{
+				asteroid[1].state.y1 = asteroid[1].state.y1 + M;
+				asteroid[1].state.y2 = asteroid[1].state.y2 + M;
+				setWindow(asteroid[1].state.x1,asteroid[1].state.y1,asteroid[1].state.x2,asteroid[1].state.y2);
+				printBMP(&asteroid[1].state);
+			}
+		}
+	}
+	if(asteroid[2].state.life == 1)
+	{
+		if(asteroid[2].row <= M)        // asteroid deploying animation finished
+		{
+			if(asteroid[2].state.y1 >= 320)
+			{
+				asteroid[2].state.life = 0;
+			}
+			else
+			{
+				asteroid[2].state.y1 = asteroid[2].state.y1 + M;
+				asteroid[2].state.y2 = asteroid[2].state.y2 + M;
+				setWindow(asteroid[2].state.x1,asteroid[2].state.y1,asteroid[2].state.x2,asteroid[2].state.y2);
+				printBMP(&asteroid[2].state);
+			}
+		}
+	}
+	if(asteroid[3].state.life == 1)
+	{
+		if(asteroid[3].row <= M)        // asteroid deploying animation finished
+		{
+			if(asteroid[3].state.y1 >= 320)
+			{
+				asteroid[3].state.life = 0;
+			}
+			else
+			{
+				asteroid[3].state.y1 = asteroid[3].state.y1 + M;
+				asteroid[3].state.y2 = asteroid[3].state.y2 + M;
+				setWindow(asteroid[3].state.x1,asteroid[3].state.y1,asteroid[3].state.x2,asteroid[3].state.y2);
+				printBMP(&asteroid[3].state);
+			}
+		}
+	}
+	if(asteroid[4].state.life == 1)
+	{
+		if(asteroid[4].row <= M)        // asteroid deploying animation finished
+		{
+			if(asteroid[4].state.y1 >= 320)
+			{
+				asteroid[4].state.life = 0;
+			}
+			else
+			{
+				asteroid[4].state.y1 = asteroid[4].state.y1 + M;
+				asteroid[4].state.y2 = asteroid[4].state.y2 + M;
+				setWindow(asteroid[4].state.x1,asteroid[4].state.y1,asteroid[4].state.x2,asteroid[4].state.y2);
+				printBMP(&asteroid[4].state);
+			}
+		}
+	}
+}*/
+
 
 // Sets the life of the sprite to 0 and moves it offscreen
 // Inputs: pointer to sprite to delete
@@ -400,8 +496,8 @@ void displayExplosionAnimation(unsigned short Ax, unsigned short Ay){
 // Outputs: true if collision detected
 bool collision(State *A, State *B)
 {
-    unsigned short Ax,Ay,Bx,By,dx,dy;
-    unsigned short radius_A, radius_B, distance;
+    unsigned int Ax,Ay,Bx,By,dx,dy;
+    unsigned int radius_A, radius_B, distance;
     getCenter(A);
     getCenter(B);
     Ax = A->center_x;
@@ -428,7 +524,7 @@ bool collision(State *A, State *B)
 
 }
 
-// Check if player has collided with another an asteroid or a PowerUp
+// Check if player has collided with another asteroid or a PowerUp
 // If player has collided with an asteroid display explosion animations
 // If player has collided with a coin add 1 to player score
 // If player has collided with a shield PowerUp then give player shield item
@@ -438,23 +534,25 @@ void detectPlayerCollision(void){
     int i;
     for(i=0;i<N; i++)
     {
-        if(collision(&player.state, &asteroid[i].state)){
-        	clearArea(asteroid[i].state.x1, asteroid[i].state.y1, asteroid[i].state.x2 , asteroid[i].state.y2, white);
-        	deleteSprite(&asteroid[i].state);
+    	if(asteroid[i].state.life == 1){
+			if(collision(&player.state, &asteroid[i].state)){
+				clearArea(asteroid[i].state.x1, asteroid[i].state.y1, asteroid[i].state.x2 , asteroid[i].state.y2, white);
+				deleteSprite(&asteroid[i].state);
 
-        	if(asteroid[i].state.image == asteroidm){
-            	player.state.image = spaceshipImage;
-            	player.state.life = player.state.life-1;
-        	}
-        	else{
-        		game_score += 1;
-        	}
+				if(asteroid[i].state.image == asteroidm){
+					player.state.image = spaceshipImage;
+					player.state.life = player.state.life-1;
+				}
+				else{
+					game_score += 1;
+				}
 
-        	if(player.state.life == 0){
-        		loopEndGame();
-        		return;
-        	}
-        }
+				if(player.state.life == 0){
+					loopEndGame();
+					return;
+				}
+			}
+    	}
     }
 
     for(i=0;i<2;i++)
@@ -530,7 +628,7 @@ void displayCountDown(void){
 // Inputs: desired random value range
 // Outputs: random value between 0:range (inclusive)
 unsigned short randomValue(unsigned char range){
-    char i;
+    int i;
     srand(ADC0());
     i = rand();
     while(i > range){

@@ -139,7 +139,7 @@ void Init_Analog(void){
 // Busy-wait analog to digital conversion
 // Outputs: 12-bit result of ADC conversion
 unsigned long ADC0(void){
-  unsigned long result;
+  volatile unsigned long result;
   ADC0_PSSI_R = 0x0008;                // 1) initiate SS3
   while((ADC0_RIS_R&0x08)==0){};       // 2) wait for conversion done
   result = ADC0_SSFIFO3_R&0xFFF;       // 3) read result
@@ -150,7 +150,7 @@ unsigned long ADC0(void){
 // Busy-wait analog to digital conversion
 // Outputs: 12-bit result of ADC conversion
 unsigned long ADC1(void){
-  unsigned long result;
+  volatile unsigned long result;
   ADC1_PSSI_R = 0x0008;                // 1) initiate SS3
   while((ADC1_RIS_R&0x08)==0){};       // 2) wait for conversion done
   result = ADC1_SSFIFO3_R&0xFFF;       // 3) read result
@@ -197,7 +197,7 @@ void check_eeprom_done(void){
 // Inputs:	data to be written
 // 			block and offset selects the location
 
-void write_eeprom(unsigned char block, unsigned char offset, unsigned long *data){
+void write_eeprom(unsigned char block, unsigned char offset, unsigned int *data){
     check_eeprom_done();                // check if EEPROM is idle first
     EEPROM_EEBLOCK_R = block;           // select block
     EEPROM_EEOFFSET_R = offset;         // select offset

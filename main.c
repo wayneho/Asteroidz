@@ -116,13 +116,12 @@ int main(void)
 	        }
 	        else
 	        {
-	        	detectPlayerCollision();
 	        	PowerUp_Status();
+	        	detectPlayerCollision();
                 playerControl(ADC0(), ADC1());
                 deployAsteroid();
                 moveAsteroid();
                 movePowerUp();
-
 	        }
 	    }
 	}

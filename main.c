@@ -50,7 +50,6 @@
  *  LCD_RESET = PA6
  *  Switch = PA7
  *  adapter DEN = PE0
- *  adapter DDIR = PA6
  *  adaper DLE = PE2
  *  4bit DAC = PC 7:4
  *  Joystick_X = PE1
@@ -72,7 +71,6 @@
 
 int main(void)
 {
-    int EEPROM_Status;
 
     // system setup
 	Init_PLL();
@@ -80,19 +78,11 @@ int main(void)
 	Init_LCD();
 	Init_Interrupt();
 	Init_Analog();
+	Init_EEPROM();
 
-	retry:
-	EEPROM_Status = Init_EEPROM();
-	switch(EEPROM_Status){
-	case 0:                     // no errors
-	    break;
-	case 1:
-	    goto retry;             // retry initilization
-	default:
-	    while(1){};             // error enter infinite loop
-	}
 
 	// game setup
+
 	clearLCD(white);
 	Init_Timer0A(20000000);     // this timer controls asteroid spawn rate (20000000*12.5ns = 0.25s)
 	Init_Timer1A(80000000);		// this timer controls the game timer (80000000*12.5ns = 1s)

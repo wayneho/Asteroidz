@@ -630,10 +630,7 @@ void displayCountDown(void){
 unsigned short randomValue(unsigned char range){
     int i;
     srand(ADC0());
-    i = rand();
-    while(i > range){
-        i = rand();
-    }
+    i = rand()%range;
     return i;
 }
 
@@ -736,7 +733,7 @@ void Distance_Handler(void){
 		level_two();
 		return;
 	}
-	if(randomValue(5) == 5){
+	if(randomValue(5) == 4){
 	  for(i=0;i<2;i++){
 		  if(powerup[i].life == 0){
 			  spawnPowerUp(i);
@@ -803,23 +800,16 @@ void spawnPowerUp(unsigned char i){
 	powerup[i].y2 = powerup[i].y1 + (POWERUP_HEIGHT-1);
 	powerup[i].life = 1;
 
-	retry:
 	random_num = randomValue(5);
 
-	if(random_num == 0 || random_num == 1){
-		// if player already has shield item then get new random number
-		if(player.state.image == spaceship_item_acquired || player.state.image == invulnerable_spaceship){
-			goto retry;
-		}
-		else{
-			powerup[i].image = powerup_shield_image;
-		}
+	if((random_num == 0 || random_num == 1)&& (player.state.image != spaceship_item_acquired)){
+		  powerup[i].image = powerup_shield_image;
 	}
 	else if(random_num == 2){
-		powerup[i].image = powerup_star_image;
+	  powerup[i].image = powerup_star_image;
 	}
 	else{
-		powerup[i].image = powerup_points_image;
+	  powerup[i].image = powerup_points_image;
 	}
 }
 // Moves PowerUps down the screen by one pixel.  The star PowerUp moves quicker than the others

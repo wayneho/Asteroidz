@@ -45,7 +45,6 @@ Created by: Wayne Ho - July 27, 2014
     LCD_RESET = PA6
     Switch = PA7
     adapter DEN = PE0
-    adapter DDIR = PA6
     adaper DLE = PE2
     4bit DAC = PC 7:4
     Joystick_X = PE1

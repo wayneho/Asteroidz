@@ -18,7 +18,7 @@ static unsigned int star_timer;
 static const unsigned char SineWave[30] = {8,9,10,11,12,13,14,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,1,2,3,4,5,6,7};        // annoying noise
 static unsigned char Index;
 volatile unsigned char reset = 1;
-volatile unsigned char start;                               		  //flag to start game after screen has been touched
+volatile unsigned char start;                            //flag to start game after screen has been touched
 static unsigned int TimerCount;                          //counter for time travelled
 static unsigned int game_score;
 
@@ -206,7 +206,7 @@ void playerControl(unsigned int x, unsigned int y){
 			player.state.x1 = player.state.x1 - 1;
 			player.state.x2 = player.state.x2 - 1;
 		}
-		if(x < 1500 && x >= 1){
+		if(x < 1500 && x >= 0){
 			player.state.x1 = player.state.x1 - 2;
 			player.state.x2 = player.state.x2 - 2;
 		}
@@ -227,7 +227,7 @@ void playerControl(unsigned int x, unsigned int y){
 			player.state.y1 = player.state.y1 - 1;
 			player.state.y2 = player.state.y2 - 1;
 		}
-		if(y < 1500 && y >= 1){
+		if(y < 1500 && y >= 0){
 			player.state.y1 = player.state.y1 - 2;
 			player.state.y2 = player.state.y2 - 2;
 		}
@@ -480,10 +480,26 @@ void displayExplosionAnimation(unsigned short Ax, unsigned short Ay){
     int i;
     for(i = 0; i < 4; i++)
     {
-        explosion[i].x1 = Ax - explosion[i].width/2;
-        explosion[i].y1 = Ay - explosion[i].height/2;
-        explosion[i].x2 = explosion[i].x1 + explosion[i].width -1;
-        explosion[i].y2 = explosion[i].y1 + explosion[i].height -1;
+    	if(player.state.x1 <= 1){
+    		//explosion[i].x1 = Ax - explosion[i].width/2 + (EXPLOSION_WIDTH-SPACESHIPWIDTH);
+    		explosion[i].x1 = 0;
+			explosion[i].y1 = Ay - explosion[i].height/2;
+			explosion[i].x2 = explosion[i].x1 + explosion[i].width -1;
+			explosion[i].y2 = explosion[i].y1 + explosion[i].height -1;
+    	}
+    	else if(player.state.x2 >= 238){
+    		//explosion[i].x1 = Ax - explosion[i].width/2 - (EXPLOSION_WIDTH-SPACESHIPWIDTH);
+    		explosion[i].x1 = 190;
+			explosion[i].y1 = Ay - explosion[i].height/2;
+			explosion[i].x2 = explosion[i].x1 + explosion[i].width -1;
+			explosion[i].y2 = explosion[i].y1 + explosion[i].height -1;
+    	}
+    	else{
+    		explosion[i].x1 = Ax - explosion[i].width/2;
+			explosion[i].y1 = Ay - explosion[i].height/2;
+			explosion[i].x2 = explosion[i].x1 + explosion[i].width -1;
+			explosion[i].y2 = explosion[i].y1 + explosion[i].height -1;
+    	}
 
         setWindow(explosion[i].x1,explosion[i].y1,explosion[i].x2,explosion[i].y2);
         printBMP2(&explosion[i]);
@@ -724,16 +740,16 @@ void Asteroid_Handler(void){
 // Player score is proportional to time travelled
 // Asteroid speed increases when game time reaches 20 seconds
 void Distance_Handler(void){
-	int i;
+	int i, random_num;
 	TIMER1_ICR_R = 0x00000001;  // clear interrupt flag
 	TimerCount++;
 	game_score++;
-
+	random_num = randomValue(4);
 	if(TimerCount == 20){
 		level_two();
 		return;
 	}
-	if(randomValue(5) == 4){
+	if(random_num != 0 || random_num != 1){
 	  for(i=0;i<2;i++){
 		  if(powerup[i].life == 0){
 			  spawnPowerUp(i);
@@ -852,14 +868,24 @@ void Init_StartScreen(void)
 // Displays the string "LEVEL 2" and a count down to begin the level
 // Resets all powerups and asteroids
 void level_two(void){
-	int i;
+	int i, num;
+
 	char word[] = {"LEVEL 2"};
+	char buffer[10];
+	char words2[] = {"SCORE: "};
+
+	num = game_score;
 	Asteroid_Timer_Stop();
 	Distance_Timer_Stop();
 	clearLCD(white);
 
+    sprintf(buffer, "%i", num);
+    writeString(words2, 92, 145, red, white);
+    writeString(buffer, 148,145, red, white);
+
+
     writeString(word, 100, 160, red, white);
-    delayMS(1000);
+    delayMS(2000);
     displayCountDown();
 	M = 2;									// increase asteroid speed
 

@@ -11,7 +11,7 @@
 
 #define DAC         (*((volatile unsigned long *)0x400063C0))           // 4 bit weighted resistor DAC; PC 7-4
 
-static char N = 5;            // number of asteroids on the screen at a time (too many will cause lag)
+static char N = 4;            // number of asteroids on the screen at a time (too many will cause lag)
 static char M = 1;            // speed at which asteroids travel
 static unsigned int shield_timer;
 static unsigned int star_timer;
@@ -246,7 +246,7 @@ void PowerUp_Status(void){
 
 	if(player.state.image == invulnerable_spaceship){
 		if(TimerCount >= shield_timer+3){
-			player.state.life -= 1;
+			player.state.life = 1;
 			player.state.image = spaceshipImage;
 		}
 	}
@@ -645,7 +645,7 @@ void displayCountDown(void){
 // Outputs: random value between 0:range (inclusive)
 unsigned short randomValue(unsigned char range){
     int i;
-    srand(ADC0());
+
     i = rand()%range;
     return i;
 }
@@ -817,8 +817,9 @@ void spawnPowerUp(unsigned char i){
 	powerup[i].life = 1;
 
 	random_num = randomValue(5);
+	//random_num = 0;
 
-	if((random_num == 0 || random_num == 1)&& (player.state.image != spaceship_item_acquired)){
+	if((random_num == 0 || random_num == 1) && (player.state.image == spaceshipImage) ){
 		  powerup[i].image = powerup_shield_image;
 	}
 	else if(random_num == 2){
@@ -869,22 +870,22 @@ void Init_StartScreen(void)
 // Resets all powerups and asteroids
 void level_two(void){
 	int i, num;
-
-	char word[] = {"LEVEL 2"};
 	char buffer[10];
+	char word[] = {"LEVEL 2"};
 	char words2[] = {"SCORE: "};
 
 	num = game_score;
 	Asteroid_Timer_Stop();
 	Distance_Timer_Stop();
+
 	clearLCD(white);
 
+	writeString(word, 100, 160, red, white);
+	writeString(words2, 92, 145, red, white);
     sprintf(buffer, "%i", num);
-    writeString(words2, 92, 145, red, white);
     writeString(buffer, 148,145, red, white);
 
 
-    writeString(word, 100, 160, red, white);
     delayMS(2000);
     displayCountDown();
 	M = 2;									// increase asteroid speed

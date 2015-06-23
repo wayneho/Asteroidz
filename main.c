@@ -67,6 +67,7 @@
 #include "game.h"
 #include "math.h"
 #include "interrupts.h"
+#include "stdlib.h"
 
 
 int main(void)
@@ -90,6 +91,7 @@ int main(void)
     Init_PowerUp();
     Init_Asteroids();
     Init_StartScreen();
+    srand(ADC0());
 
 	while(1)
 	{

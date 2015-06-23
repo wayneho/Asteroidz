@@ -1,2 +1,0 @@
-# Asteroidz
-microcontroller game

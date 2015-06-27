@@ -1,9 +1,9 @@
 /***************************************************************************************************************************************************
- *										   ___    ____ ______ ___   ____    ____  ___   ____
- *										  / _ |  / __//_  __// _ \ / __ \  /  _/ / _ \ /_  /
- *										 / __ | _\ \   / /  / , _// /_/ / _/ /  / // /  / /_
- *										/_/ |_|/___/  /_/  /_/|_| \____/ /___/ /____/  /___/
- *
+ *		   ___    ____ ______ ___   ____    ____  ___   ____
+ *		  / _ |  / __//_  __// _ \ / __ \  /  _/ / _ \ /_  /
+ *		 / __ | _\ \   / /  / , _// /_/ / _/ /  / // /  / /_
+ *		/_/ |_|/___/  /_/  /_/|_| \____/ /___/ /____/  /___/
+ 
  ****************************************************************************************************************************************************
  *
  *  Created by: Wayne Ho - July 27, 2014
@@ -72,7 +72,7 @@
 
 int main(void)
 {
-
+	
     // system setup
 	Init_PLL();
 	Init_Port();
@@ -85,13 +85,13 @@ int main(void)
 	// game setup
 
 	clearLCD(white);
-	Init_Timer0A(20000000);     // this timer controls asteroid spawn rate (20000000*12.5ns = 0.25s)
+	Init_Timer0A(20000000);     	// this timer controls asteroid spawn rate (20000000*12.5ns = 0.25s)
 	Init_Timer1A(80000000);		// this timer controls the game timer (80000000*12.5ns = 1s)
-    Init_Explosions();
-    Init_PowerUp();
-    Init_Asteroids();
-    Init_StartScreen();
-    srand(ADC0());
+	Init_Explosions();
+    	Init_PowerUp();
+	Init_Asteroids();
+    	Init_StartScreen();
+    	srand(ADC0());
 
 	while(1)
 	{
@@ -100,20 +100,20 @@ int main(void)
 	        if(reset){
 	        	Asteroid_Timer_Stop();
 	        	Distance_Timer_Stop();
-	            delayMS(200);   			// delay needed for touchscreen PENIRQ to settle
-	            resetGame();
-	            Asteroid_Timer_Start();
-	            Distance_Timer_Start();
+	            	delayMS(200);   			// delay needed for touchscreen PENIRQ to settle
+	            	resetGame();
+	            	Asteroid_Timer_Start();
+	            	Distance_Timer_Start();
 
 	        }
 	        else
 	        {
 	        	PowerUp_Status();
 	        	detectPlayerCollision();
-                playerControl(ADC0(), ADC1());
-                deployAsteroid();
-                moveAsteroid();
-                movePowerUp();
+                	playerControl(ADC0(), ADC1());
+                	deployAsteroid();
+                	moveAsteroid();
+                	movePowerUp();
 	        }
 	    }
 	}

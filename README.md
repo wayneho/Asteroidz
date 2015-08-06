@@ -1,6 +1,6 @@
 Asteroidz
 ========
-Created by: Wayne Ho - July 27, 2014
+Created by: Wayne Ho 
  
  	The object of this game is to travel as far as possible while avoiding asteroids.  There are 3 power-ups that spawn randomly.
  	The points power-up spawns most often and when picked up adds 3 points to the player's score.  The shield power-up allows the player to become
@@ -33,9 +33,9 @@ Created by: Wayne Ho - July 27, 2014
     1x Audio Jack (SPC24110)
  
 ========
-   Connection:
+    Connection:
  
-  	LCD_DIN 7:0 = PB 7:0
+    LCD_DIN 7:0 = PB 7:0
     LCD_RS = PD2
     LCD_RD = PD3
     LCD_WR = PD6

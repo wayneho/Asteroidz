@@ -11,7 +11,7 @@
 
 #define DAC         (*((volatile unsigned long *)0x400063C0))           // 4 bit weighted resistor DAC; PC 7-4
 
-static char N = 4;            // number of asteroids on the screen at a time (too many will cause lag)
+static char N = 5;            // number of asteroids on the screen at a time (too many will cause lag)
 static char M = 1;            // speed at which asteroids travel
 static unsigned int shield_timer;
 static unsigned int star_timer;
@@ -347,97 +347,6 @@ void moveAsteroid(void){
         }
     }
 }
-
-/*void moveAsteroid(void){
-
-	if(asteroid[0].state.life == 1)
-	{
-		if(asteroid[0].row <= M)        // asteroid deploying animation finished
-		{
-			if(asteroid[0].state.y1 >= 320)
-			{
-				asteroid[0].state.life = 0;
-			}
-			else
-			{
-				asteroid[0].state.y1 = asteroid[0].state.y1 + M;
-				asteroid[0].state.y2 = asteroid[0].state.y2 + M;
-				setWindow(asteroid[0].state.x1,asteroid[0].state.y1,asteroid[0].state.x2,asteroid[0].state.y2);
-				printBMP(&asteroid[0].state);
-
-			}
-		}
-	}
-	if(asteroid[1].state.life == 1)
-	{
-		if(asteroid[1].row <= M)        // asteroid deploying animation finished
-		{
-			if(asteroid[1].state.y1 >= 320)
-			{
-				asteroid[1].state.life = 0;
-			}
-			else
-			{
-				asteroid[1].state.y1 = asteroid[1].state.y1 + M;
-				asteroid[1].state.y2 = asteroid[1].state.y2 + M;
-				setWindow(asteroid[1].state.x1,asteroid[1].state.y1,asteroid[1].state.x2,asteroid[1].state.y2);
-				printBMP(&asteroid[1].state);
-			}
-		}
-	}
-	if(asteroid[2].state.life == 1)
-	{
-		if(asteroid[2].row <= M)        // asteroid deploying animation finished
-		{
-			if(asteroid[2].state.y1 >= 320)
-			{
-				asteroid[2].state.life = 0;
-			}
-			else
-			{
-				asteroid[2].state.y1 = asteroid[2].state.y1 + M;
-				asteroid[2].state.y2 = asteroid[2].state.y2 + M;
-				setWindow(asteroid[2].state.x1,asteroid[2].state.y1,asteroid[2].state.x2,asteroid[2].state.y2);
-				printBMP(&asteroid[2].state);
-			}
-		}
-	}
-	if(asteroid[3].state.life == 1)
-	{
-		if(asteroid[3].row <= M)        // asteroid deploying animation finished
-		{
-			if(asteroid[3].state.y1 >= 320)
-			{
-				asteroid[3].state.life = 0;
-			}
-			else
-			{
-				asteroid[3].state.y1 = asteroid[3].state.y1 + M;
-				asteroid[3].state.y2 = asteroid[3].state.y2 + M;
-				setWindow(asteroid[3].state.x1,asteroid[3].state.y1,asteroid[3].state.x2,asteroid[3].state.y2);
-				printBMP(&asteroid[3].state);
-			}
-		}
-	}
-	if(asteroid[4].state.life == 1)
-	{
-		if(asteroid[4].row <= M)        // asteroid deploying animation finished
-		{
-			if(asteroid[4].state.y1 >= 320)
-			{
-				asteroid[4].state.life = 0;
-			}
-			else
-			{
-				asteroid[4].state.y1 = asteroid[4].state.y1 + M;
-				asteroid[4].state.y2 = asteroid[4].state.y2 + M;
-				setWindow(asteroid[4].state.x1,asteroid[4].state.y1,asteroid[4].state.x2,asteroid[4].state.y2);
-				printBMP(&asteroid[4].state);
-			}
-		}
-	}
-}*/
-
 
 // Sets the life of the sprite to 0 and moves it offscreen
 // Inputs: pointer to sprite to delete
@@ -837,8 +746,8 @@ void movePowerUp(void){
 		if(powerup[i].life == 1){
 			if(powerup[i].y1 < 320){
 				if(powerup[i].image == powerup_star_image){
-					powerup[i].y1 = powerup[i].y1 + 2;
-					powerup[i].y2 = powerup[i].y2 + 2;
+					powerup[i].y1 = powerup[i].y1 + 1;
+					powerup[i].y2 = powerup[i].y2 + 1;
 				}
 				else{
 					powerup[i].y1 = powerup[i].y1 + 1;

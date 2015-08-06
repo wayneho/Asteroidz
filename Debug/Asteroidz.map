@@ -1,17 +1,17 @@
 ******************************************************************************
-                  TI ARM Linker PC v5.1.6                      
+                  TI ARM Linker PC v5.2.5                      
 ******************************************************************************
->> Linked Wed Jun 10 21:41:00 2015
+>> Linked Thu Aug 06 15:29:12 2015
 
 OUTPUT FILE NAME:   <Asteroidz.out>
-ENTRY POINT SYMBOL: "_c_int00"  address: 00011b99
+ENTRY POINT SYMBOL: "_c_int00"  address: 0001298d
 
 
 MEMORY CONFIGURATION
 
          name            origin    length      used     unused   attr    fill
 ----------------------  --------  ---------  --------  --------  ----  --------
-  FLASH                 00000000   00040000  00011efa  0002e106  R  X
+  FLASH                 00000000   00040000  00012d2b  0002d2d5  R  X
   SRAM                  20000000   00008000  000006a5  0000795b  RW X
 
 
@@ -19,11 +19,11 @@ SEGMENT ALLOCATION MAP
 
 run origin  load origin   length   init length attrs members
 ----------  ----------- ---------- ----------- ----- -------
-00000000    00000000    00011f00   00011f00    r-x
+00000000    00000000    00012d30   00012d30    r-x
   00000000    00000000    0000026c   0000026c    r-- .intvecs
-  0000026c    0000026c    0000df90   0000df90    r-- .const
-  0000e1fc    0000e1fc    00003c86   00003c86    r-x .text
-  00011e88    00011e88    00000078   00000078    r-- .cinit
+  0000026c    0000026c    0000df69   0000df69    r-- .const
+  0000e1d8    0000e1d8    00004ade   00004ade    r-x .text
+  00012cb8    00012cb8    00000078   00000078    r-- .cinit
 20000000    20000000    000006a5   00000000    rw-
   20000000    20000000    00000400   00000000    rw- .stack
   20000400    20000400    000002a4   00000000    rw- .data
@@ -38,74 +38,76 @@ section   page    origin      length       input sections
 .intvecs   0    00000000    0000026c     
                   00000000    0000026c     tm4c123gh6pm_startup_ccs.obj (.intvecs)
 
+.const     0    0000026c    0000df69     
+                  0000026c    0000de68     game.obj (.const)
+                  0000e0d4    00000101     rtsv7M4_T_le_v4SPD16_eabi.lib : ctype.obj (.const:.string:_ctypes_)
+
+.text      0    0000e1d8    00004ade     
+                  0000e1d8    0000168c     game.obj (.text)
+                  0000f864    00001402     rtsv7M4_T_le_v4SPD16_eabi.lib : _printfi.obj (.text)
+                  00010c66    00000002                                   : _lock.obj (.text)
+                  00010c68    000005ae     LCD.obj (.text)
+                  00011216    00000002     --HOLE-- [fill = 0]
+                  00011218    000003f8     driver.obj (.text)
+                  00011610    00000380     rtsv7M4_T_le_v4SPD16_eabi.lib : sqrt.obj (.text)
+                  00011990    000002a0                                   : ldexp.obj (.text)
+                  00011c30    000001f4                                   : ull_div_t2.obj (.text)
+                  00011e24    00000004                                   : pre_init.obj (.text)
+                  00011e28    000001c0     interrupts.obj (.text)
+                  00011fe8    000001b6     rtsv7M4_T_le_v4SPD16_eabi.lib : fd_add_t2.obj (.text)
+                  0001219e    00000136                                   : fd_div_t2.obj (.text)
+                  000122d4    0000011a                                   : xdunscal.obj (.text)
+                  000123ee    000000fc                                   : fd_mul_t2.obj (.text)
+                  000124ea    00000006                                   : copy_decompress_rle.obj (.text:decompress:rle24)
+                  000124f0    000000f8     main.obj (.text)
+                  000125e8    0000009c     rtsv7M4_T_le_v4SPD16_eabi.lib : memcpy_t2.obj (.text)
+                  00012684    00000086                                   : fd_cmp_t2.obj (.text:__aeabi_cdcmple)
+                  0001270a    00000086                                   : fd_cmp_t2.obj (.text:__aeabi_cdrcmple)
+                  00012790    0000007a                                   : memset_t2.obj (.text)
+                  0001280a    00000002     --HOLE-- [fill = 0]
+                  0001280c    0000006c                                   : autoinit.obj (.text)
+                  00012878    0000006a                                   : copy_decompress_rle.obj (.text)
+                  000128e2    00000056                                   : ltoa.obj (.text)
+                  00012938    00000052                                   : sprintf.obj (.text)
+                  0001298a    00000002     --HOLE-- [fill = 0]
+                  0001298c    00000050                                   : boot.obj (.text)
+                  000129dc    0000004c                                   : cpy_tbl.obj (.text)
+                  00012a28    00000048                                   : fd_toi_t2.obj (.text)
+                  00012a70    00000048                                   : rand.obj (.text)
+                  00012ab8    00000044                                   : exit.obj (.text)
+                  00012afc    00000044                                   : fd_tou_t2.obj (.text)
+                  00012b40    0000003c                                   : signal.obj (.text)
+                  00012b7c    00000030                                   : xferaise.obj (.text)
+                  00012bac    0000002e                                   : i_tofd_t2.obj (.text)
+                  00012bda    00000026                                   : raise.obj (.text)
+                  00012c00    00000022                                   : frexp.obj (.text)
+                  00012c22    00000002     --HOLE-- [fill = 0]
+                  00012c24    00000020                                   : feraiseexcept.obj (.text)
+                  00012c44    00000020                                   : u_tofd_t2.obj (.text)
+                  00012c64    00000004     --HOLE-- [fill = 0]
+                  00012c68    0000001a     tm4c123gh6pm_startup_ccs.obj (.text)
+                  00012c82    00000002     --HOLE-- [fill = 0]
+                  00012c84    00000018     rtsv7M4_T_le_v4SPD16_eabi.lib : args_main.obj (.text)
+                  00012c9c    0000000e                                   : copy_decompress_none.obj (.text:decompress:none)
+                  00012caa    0000000c                                   : copy_zero_init.obj (.text:decompress:ZI)
+
+.cinit     0    00012cb8    00000078     
+                  00012cb8    0000004e     (.cinit..data.load) [load image, compression = rle]
+                  00012d06    00000002     --HOLE-- [fill = 0]
+                  00012d08    0000000c     (__TI_handler_table)
+                  00012d14    00000004     --HOLE-- [fill = 0]
+                  00012d18    00000008     (.cinit..bss.load) [load image, compression = zero_init]
+                  00012d20    00000010     (__TI_cinit_table)
+
 .init_array 
 *          0    00000000    00000000     UNINITIALIZED
-
-.const     0    0000026c    0000df90     
-                  0000026c    0000de78     game.obj (.const)
-                  0000e0e4    00000101     rtsv7M4_T_le_v4SPD16_eabi.lib : ctype.obj (.const:.string:_ctypes_)
-                  0000e1e5    00000003     --HOLE-- [fill = 0]
-                  0000e1e8    00000014     <whole-program> (.const:.string)
-
-.text      0    0000e1fc    00003c86     
-                  0000e1fc    00000fb0     game.obj (.text)
-                  0000f1ac    00000f44     rtsv7M4_T_le_v4SPD16_eabi.lib : _printfi.obj (.text)
-                  000100f0    000006aa     LCD.obj (.text)
-                  0001079a    000003e8     driver.obj (.text)
-                  00010b82    000001f4     rtsv7M4_T_le_v4SPD16_eabi.lib : ull_div_t2.obj (.text)
-                  00010d76    000001b6                                   : fd_add_t2.obj (.text)
-                  00010f2c    0000019c     interrupts.obj (.text)
-                  000110c8    00000154     rtsv7M4_T_le_v4SPD16_eabi.lib : sqrt.obj (.text)
-                  0001121c    00000136                                   : fd_div_t2.obj (.text)
-                  00011352    000000fc                                   : fd_mul_t2.obj (.text)
-                  0001144e    00000002                                   : _lock.obj (.text)
-                  00011450    000000e8                                   : xdscale.obj (.text)
-                  00011538    000000c4     main.obj (.text)
-                  000115fc    000000c4     rtsv7M4_T_le_v4SPD16_eabi.lib : xdnorm.obj (.text)
-                  000116c0    0000009c                                   : memcpy_t2.obj (.text)
-                  0001175c    00000094                                   : auto_init.obj (.text)
-                  000117f0    00000086                                   : fd_cmp_t2.obj (.text:__aeabi_cdcmple)
-                  00011876    00000086                                   : fd_cmp_t2.obj (.text:__aeabi_cdrcmple)
-                  000118fc    00000078                                   : memset_t2.obj (.text)
-                  00011974    0000006a                                   : xdclass.obj (.text)
-                  000119de    00000064                                   : xdunscal.obj (.text)
-                  00011a42    0000005e                                   : copy_decompress_rle.obj (.text)
-                  00011aa0    0000005a                                   : ltoa.obj (.text)
-                  00011afa    00000052                                   : sprintf.obj (.text)
-                  00011b4c    0000004c                                   : atoi.obj (.text)
-                  00011b98    00000048                                   : boot.obj (.text)
-                  00011be0    00000048                                   : fd_toi_t2.obj (.text)
-                  00011c28    00000048                                   : rand.obj (.text)
-                  00011c70    00000044                                   : cpy_tbl.obj (.text)
-                  00011cb4    00000044                                   : exit.obj (.text)
-                  00011cf8    00000044                                   : fd_tou_t2.obj (.text)
-                  00011d3c    0000003c                                   : signal.obj (.text)
-                  00011d78    0000002e                                   : i_tofd_t2.obj (.text)
-                  00011da6    00000026                                   : raise.obj (.text)
-                  00011dcc    00000020                                   : feraiseexcept.obj (.text)
-                  00011dec    00000020                                   : u_tofd_t2.obj (.text)
-                  00011e0c    00000018                                   : args_main.obj (.text)
-                  00011e24    00000018                                   : ll_mul_t2.obj (.text)
-                  00011e3c    00000014                                   : strlen.obj (.text)
-                  00011e50    00000012                                   : copy_zero_init.obj (.text:decompress:ZI)
-                  00011e62    0000000e                                   : copy_decompress_none.obj (.text:decompress:none)
-                  00011e70    0000000c     tm4c123gh6pm_startup_ccs.obj (.text)
-                  00011e7c    00000006     rtsv7M4_T_le_v4SPD16_eabi.lib : copy_decompress_rle.obj (.text:decompress:rle24)
-
-.cinit     0    00011e88    00000078     
-                  00011e88    0000004e     (.cinit..data.load) [load image, compression = rle]
-                  00011ed6    00000002     --HOLE-- [fill = 0]
-                  00011ed8    0000000c     (__TI_handler_table)
-                  00011ee4    00000004     --HOLE-- [fill = 0]
-                  00011ee8    00000008     (.cinit..bss.load) [load image, compression = zero_init]
-                  00011ef0    00000010     (__TI_cinit_table)
 
 .stack     0    20000000    00000400     UNINITIALIZED
                   20000000    00000400     --HOLE--
 
 .data      0    20000400    000002a4     UNINITIALIZED
                   20000400    00000150     game.obj (.data)
-                  20000550    000000b0     rtsv7M4_T_le_v4SPD16_eabi.lib : signal.obj (.data:sigtable$25)
+                  20000550    000000b0     rtsv7M4_T_le_v4SPD16_eabi.lib : signal.obj (.data:sigtable$29)
                   20000600    00000080                                   : xvalues.obj (.data)
                   20000680    00000008                                   : _lock.obj (.data)
                   20000688    00000008                                   : exit.obj (.data)
@@ -117,17 +119,23 @@ section   page    origin      length       input sections
 .bss       0    200006a4    00000001     UNINITIALIZED
                   200006a4    00000001     (.common:start)
 
+.TI.persistent 
+*          0    20000400    00000000     UNINITIALIZED
+
+.TI.noinit 
+*          0    200006a4    00000000     UNINITIALIZED
+
 
 LINKER GENERATED COPY TABLES
 
-__TI_cinit_table @ 00011ef0 records: 2, size/record: 8, table size: 16
-	.data: load addr=00011e88, load size=0000004e bytes, run addr=20000400, run size=000002a4 bytes, compression=rle
-	.bss: load addr=00011ee8, load size=00000008 bytes, run addr=200006a4, run size=00000001 bytes, compression=zero_init
+__TI_cinit_table @ 00012d20 records: 2, size/record: 8, table size: 16
+	.data: load addr=00012cb8, load size=0000004e bytes, run addr=20000400, run size=000002a4 bytes, compression=rle
+	.bss: load addr=00012d18, load size=00000008 bytes, run addr=200006a4, run size=00000001 bytes, compression=zero_init
 
 
 LINKER GENERATED HANDLER TABLE
 
-__TI_handler_table @ 00011ed8 records: 3, size/record: 4, table size: 12
+__TI_handler_table @ 00012d08 records: 3, size/record: 4, table size: 12
 	index: 0, handler: __TI_decompress_rle24
 	index: 1, handler: __TI_decompress_none
 	index: 2, handler: __TI_zero_init
@@ -135,333 +143,327 @@ __TI_handler_table @ 00011ed8 records: 3, size/record: 4, table size: 12
 
 GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
 
-address    name
---------   ----
-00010af3   ADC0
-00010b21   ADC1
-0000f175   Asteroid_Handler
-00011cb5   C$$EXIT
-0000f0ed   Distance_Handler
-0000ee5f   GPIOPortA_Handler
-000109db   Init_Analog
-0000e301   Init_Asteroids
-00010a95   Init_EEPROM
-0000e1fd   Init_Explosions
-00010f2d   Init_Interrupt
-00010189   Init_LCD
-0001079b   Init_PLL
-0000ecff   Init_Player
-00010805   Init_Port
-0000e2b1   Init_PowerUp
-00011069   Init_Sound
-0000e36d   Init_StartScreen
-00010faf   Init_Timer0A
-0001100b   Init_Timer1A
-0000e39b   PowerUp_Status
-00011e71   ResetISR
-UNDEFED    SHT$$INIT_ARRAY$$Base
-UNDEFED    SHT$$INIT_ARRAY$$Limit
-0000ee25   Sound_Handler
-0000ee01   Touchscreen_Handler
-00011975   _Dclass
-20000600   _Denorm
-000115fd   _Dnorm
-00011451   _Dscale
-000119df   _Dunscale
-20000610   _Eps
-20000698   _Errno
-20000690   _Fenv
-20000620   _Hugeval
-20000670   _Inf
-20000660   _Nan
-20000640   _Rteps
-20000630   _Snan
-20000694   _Tls_setup__Fenv
-20000650   _Xbig
-20000658   _Zero
-20000400   __STACK_END
-00000400   __STACK_SIZE
-20000200   __STACK_TOP
-00011ef0   __TI_CINIT_Base
-00011f00   __TI_CINIT_Limit
-00011ed8   __TI_Handler_Table_Base
-00011ee4   __TI_Handler_Table_Limit
-00000001   __TI_args_main
-0001175d   __TI_auto_init
-20000688   __TI_cleanup_ptr
-00011e63   __TI_decompress_none
-00011e7d   __TI_decompress_rle24
-2000068c   __TI_dtors_ptr
-0000ff57   __TI_printfi
-00000000   __TI_static_base__
-00011e51   __TI_zero_init
-000117f1   __aeabi_cdcmpeq
-000117f1   __aeabi_cdcmple
-00011877   __aeabi_cdrcmple
-00011be1   __aeabi_d2iz
-00011cf9   __aeabi_d2uiz
-00010d81   __aeabi_dadd
-0001121d   __aeabi_ddiv
-00011353   __aeabi_dmul
-00010d77   __aeabi_dsub
-00011d79   __aeabi_i2d
-00011e25   __aeabi_lmul
-000118fd   __aeabi_memclr
-000118fd   __aeabi_memclr4
-000118fd   __aeabi_memclr8
-000116c1   __aeabi_memcpy
-000116c1   __aeabi_memcpy4
-000116c1   __aeabi_memcpy8
-000118ff   __aeabi_memset
-000118ff   __aeabi_memset4
-000118ff   __aeabi_memset8
-00011ded   __aeabi_ui2d
-00010b83   __aeabi_uldivmod
-ffffffff   __binit__
-ffffffff   __c_args__
-20000000   __stack
-00011e0d   _args_main
-00011b99   _c_int00
-0000e0e4   _ctypes_
-20000680   _lock
-0001144f   _nop
-20000684   _unlock
-00011cb9   abort
-0000f139   addAsteroidMedium
-200004c4   asteroid
-000002c6   asteroidm
-00011b4d   atoi
-ffffffff   binit
-00010a7f   check_eeprom_done
-0001074d   clearArea
-00010725   clearLCD
-00000906   coin_fade_image
-000005e6   coin_image
-0000e45b   collision
-00011c71   copy_in
-000109ab   delayMS
-0000ea7d   deployAsteroid
-0000e811   detectPlayerCollision
-0000ec29   displayCountDown
-0000e5fb   displayEndScreen
-0000e703   displayExplosionAnimation
-00010b4f   erase_eeprom
-00011cc1   exit
-20000464   explosion
-0000457e   explosionImage0
-00005906   explosionImage1
-00006c8e   explosionImage2
-00008016   explosionImage3
-00011dcd   feraiseexcept
-00000c26   font8x8_basic
-00000000   g_pfnVectors
-0000e433   getCenter
-00002ffe   invulnerable_spaceship
-0000eca1   level_one
-0000ef6b   level_two
-0000e7e5   loopEndGame
-00011aa1   ltoa
-00011539   main
-200006a0   main_func_sp
-000116c1   memcpy
-00011905   memset
-0000eb1f   moveAsteroid
-0000eba1   movePowerUp
-0000e7bd   playSound
-20000418   player
-0000e965   playerControl
-20000434   powerup
-0000172e   powerup_points_image
-00001026   powerup_shield_image
-00001e36   powerup_star_image
-0000e697   printBMP2
-00011da7   raise
-00011c3d   rand
-0000e4f3   read_highscore
-20000400   reset
-0000ed65   resetGame
-0001077b   setCursor
-000106d9   setWindow
-00011d3d   signal
-0000253e   spaceshipImage
-00003abe   spaceship_item_acquired
-0000eedb   spawnPowerUp
-00011b1d   sprintf
-000110c9   sqrt
-00011c29   srand
-200006a4   start
-0000939e   start_image
-00011e3d   strlen
-0000e527   writeCharacter
-000100f1   writeCmd
-0001013d   writeData
-0000e5a5   writeString
-0000e5c7   write_highscore
+address   name                     
+-------   ----                     
+00011581  ADC0                     
+000115b1  ADC1                     
+0000f821  Asteroid_Handler         
+00012ab9  C$$EXIT                  
+0000f791  Distance_Handler         
+0000f4f9  GPIOPortA_Handler        
+00011469  Init_Analog              
+0000e2e1  Init_Asteroids           
+00011529  Init_EEPROM              
+0000e1d9  Init_Explosions          
+00011e29  Init_Interrupt           
+00010d31  Init_LCD                 
+00011219  Init_PLL                 
+0000f259  Init_Player              
+00011281  Init_Port                
+0000e291  Init_PowerUp             
+00011f81  Init_Sound               
+0000e361  Init_StartScreen         
+00011eb1  Init_Timer0A             
+00011f19  Init_Timer1A             
+0000e409  PowerUp_Status           
+00012c69  ResetISR                 
+UNDEFED   SHT$$INIT_ARRAY$$Base    
+UNDEFED   SHT$$INIT_ARRAY$$Limit   
+0000f4b9  Sound_Handler            
+0000f481  Touchscreen_Handler      
+20000600  _Denorm                  
+000122d5  _Dunscale                
+20000610  _Eps                     
+20000698  _Errno                   
+20000690  _Fenv                    
+00012b7d  _Feraise                 
+20000620  _Hugeval                 
+20000670  _Inf                     
+20000660  _Nan                     
+20000640  _Rteps                   
+20000630  _Snan                    
+20000694  _Tls_setup__Fenv         
+20000650  _Xbig                    
+20000658  _Zero                    
+20000400  __STACK_END              
+00000400  __STACK_SIZE             
+20000200  __STACK_TOP              
+00012d20  __TI_CINIT_Base          
+00012d30  __TI_CINIT_Limit         
+00012d08  __TI_Handler_Table_Base  
+00012d14  __TI_Handler_Table_Limit 
+0001280d  __TI_auto_init           
+20000688  __TI_cleanup_ptr         
+00012c9d  __TI_decompress_none     
+000124eb  __TI_decompress_rle24    
+2000068c  __TI_dtors_ptr           
+00010a8b  __TI_printfi             
+00000000  __TI_static_base__       
+00012cab  __TI_zero_init           
+00012685  __aeabi_cdcmpeq          
+00012685  __aeabi_cdcmple          
+0001270b  __aeabi_cdrcmple         
+00012a29  __aeabi_d2iz             
+00012afd  __aeabi_d2uiz            
+00011ff3  __aeabi_dadd             
+0001219f  __aeabi_ddiv             
+000123ef  __aeabi_dmul             
+00011fe9  __aeabi_dsub             
+00012bad  __aeabi_i2d              
+00012791  __aeabi_memclr           
+00012791  __aeabi_memclr4          
+00012791  __aeabi_memclr8          
+000125e9  __aeabi_memcpy           
+000125e9  __aeabi_memcpy4          
+000125e9  __aeabi_memcpy8          
+00012793  __aeabi_memset           
+00012793  __aeabi_memset4          
+00012793  __aeabi_memset8          
+00012c45  __aeabi_ui2d             
+00011c31  __aeabi_uldivmod         
+ffffffff  __binit__                
+ffffffff  __c_args__               
+20000000  __stack                  
+00012c85  _args_main               
+0001298d  _c_int00                 
+0000e0d4  _ctypes_                 
+20000680  _lock                    
+00010c67  _nop                     
+00011e25  _system_pre_init         
+20000684  _unlock                  
+00012abd  abort                    
+0000f7e1  addAsteroidMedium        
+200004c4  asteroid                 
+000002b6  asteroidm                
+ffffffff  binit                    
+00011511  check_eeprom_done        
+000110e9  clearArea                
+00011011  clearLCD                 
+000008f6  coin_fade_image          
+000005d6  coin_image               
+0000e4a9  collision                
+000129dd  copy_in                  
+00011429  delayMS                  
+0000ed01  deployAsteroid           
+0000e959  detectPlayerCollision    
+0000f121  displayCountDown         
+0000e689  displayEndScreen         
+0000e831  displayExplosionAnimation
+000115e1  erase_eeprom             
+00012ac5  exit                     
+20000464  explosion                
+0000456e  explosionImage0          
+000058f6  explosionImage1          
+00006c7e  explosionImage2          
+00008006  explosionImage3          
+00012c25  feraiseexcept            
+00000c16  font8x8_basic            
+00012c01  frexp                    
+00000000  g_pfnVectors             
+00002fee  invulnerable_spaceship   
+00011991  ldexp                    
+0000f1e9  level_one                
+0000f5f1  level_two                
+0000e929  loopEndGame              
+000128e3  ltoa                     
+000124f1  main                     
+200006a0  main_func_sp             
+000125e9  memcpy                   
+00012799  memset                   
+0000ee61  moveAsteroid             
+0000eff1  movePowerUp              
+0000e901  playSound                
+20000418  player                   
+0000ead1  playerControl            
+20000434  powerup                  
+0000171e  powerup_points_image     
+00001016  powerup_shield_image     
+00001e26  powerup_star_image       
+0000e729  printBMP2                
+00012bdb  raise                    
+00012a85  rand                     
+0000f551  randomValue              
+0000e579  read_highscore           
+20000400  reset                    
+0000f3d1  resetGame                
+00011201  setCursor                
+00010fd9  setWindow                
+00012b41  signal                   
+0000252e  spaceshipImage           
+00003aae  spaceship_item_acquired  
+0000f569  spawnPowerUp             
+0001295b  sprintf                  
+00011611  sqrt                     
+00012a71  srand                    
+200006a4  start                    
+0000938e  start_image              
+0000e5b9  writeCharacter           
+00010c69  writeCmd                 
+00010cb9  writeReg                 
+0000e629  writeString              
+0000e651  write_highscore          
 
 
 GLOBAL SYMBOLS: SORTED BY Symbol Address 
 
-address    name
---------   ----
-00000000   __TI_static_base__
-00000000   g_pfnVectors
-00000001   __TI_args_main
-000002c6   asteroidm
-00000400   __STACK_SIZE
-000005e6   coin_image
-00000906   coin_fade_image
-00000c26   font8x8_basic
-00001026   powerup_shield_image
-0000172e   powerup_points_image
-00001e36   powerup_star_image
-0000253e   spaceshipImage
-00002ffe   invulnerable_spaceship
-00003abe   spaceship_item_acquired
-0000457e   explosionImage0
-00005906   explosionImage1
-00006c8e   explosionImage2
-00008016   explosionImage3
-0000939e   start_image
-0000e0e4   _ctypes_
-0000e1fd   Init_Explosions
-0000e2b1   Init_PowerUp
-0000e301   Init_Asteroids
-0000e36d   Init_StartScreen
-0000e39b   PowerUp_Status
-0000e433   getCenter
-0000e45b   collision
-0000e4f3   read_highscore
-0000e527   writeCharacter
-0000e5a5   writeString
-0000e5c7   write_highscore
-0000e5fb   displayEndScreen
-0000e697   printBMP2
-0000e703   displayExplosionAnimation
-0000e7bd   playSound
-0000e7e5   loopEndGame
-0000e811   detectPlayerCollision
-0000e965   playerControl
-0000ea7d   deployAsteroid
-0000eb1f   moveAsteroid
-0000eba1   movePowerUp
-0000ec29   displayCountDown
-0000eca1   level_one
-0000ecff   Init_Player
-0000ed65   resetGame
-0000ee01   Touchscreen_Handler
-0000ee25   Sound_Handler
-0000ee5f   GPIOPortA_Handler
-0000eedb   spawnPowerUp
-0000ef6b   level_two
-0000f0ed   Distance_Handler
-0000f139   addAsteroidMedium
-0000f175   Asteroid_Handler
-0000ff57   __TI_printfi
-000100f1   writeCmd
-0001013d   writeData
-00010189   Init_LCD
-000106d9   setWindow
-00010725   clearLCD
-0001074d   clearArea
-0001077b   setCursor
-0001079b   Init_PLL
-00010805   Init_Port
-000109ab   delayMS
-000109db   Init_Analog
-00010a7f   check_eeprom_done
-00010a95   Init_EEPROM
-00010af3   ADC0
-00010b21   ADC1
-00010b4f   erase_eeprom
-00010b83   __aeabi_uldivmod
-00010d77   __aeabi_dsub
-00010d81   __aeabi_dadd
-00010f2d   Init_Interrupt
-00010faf   Init_Timer0A
-0001100b   Init_Timer1A
-00011069   Init_Sound
-000110c9   sqrt
-0001121d   __aeabi_ddiv
-00011353   __aeabi_dmul
-0001144f   _nop
-00011451   _Dscale
-00011539   main
-000115fd   _Dnorm
-000116c1   __aeabi_memcpy
-000116c1   __aeabi_memcpy4
-000116c1   __aeabi_memcpy8
-000116c1   memcpy
-0001175d   __TI_auto_init
-000117f1   __aeabi_cdcmpeq
-000117f1   __aeabi_cdcmple
-00011877   __aeabi_cdrcmple
-000118fd   __aeabi_memclr
-000118fd   __aeabi_memclr4
-000118fd   __aeabi_memclr8
-000118ff   __aeabi_memset
-000118ff   __aeabi_memset4
-000118ff   __aeabi_memset8
-00011905   memset
-00011975   _Dclass
-000119df   _Dunscale
-00011aa1   ltoa
-00011b1d   sprintf
-00011b4d   atoi
-00011b99   _c_int00
-00011be1   __aeabi_d2iz
-00011c29   srand
-00011c3d   rand
-00011c71   copy_in
-00011cb5   C$$EXIT
-00011cb9   abort
-00011cc1   exit
-00011cf9   __aeabi_d2uiz
-00011d3d   signal
-00011d79   __aeabi_i2d
-00011da7   raise
-00011dcd   feraiseexcept
-00011ded   __aeabi_ui2d
-00011e0d   _args_main
-00011e25   __aeabi_lmul
-00011e3d   strlen
-00011e51   __TI_zero_init
-00011e63   __TI_decompress_none
-00011e71   ResetISR
-00011e7d   __TI_decompress_rle24
-00011ed8   __TI_Handler_Table_Base
-00011ee4   __TI_Handler_Table_Limit
-00011ef0   __TI_CINIT_Base
-00011f00   __TI_CINIT_Limit
-20000000   __stack
-20000200   __STACK_TOP
-20000400   __STACK_END
-20000400   reset
-20000418   player
-20000434   powerup
-20000464   explosion
-200004c4   asteroid
-20000600   _Denorm
-20000610   _Eps
-20000620   _Hugeval
-20000630   _Snan
-20000640   _Rteps
-20000650   _Xbig
-20000658   _Zero
-20000660   _Nan
-20000670   _Inf
-20000680   _lock
-20000684   _unlock
-20000688   __TI_cleanup_ptr
-2000068c   __TI_dtors_ptr
-20000690   _Fenv
-20000694   _Tls_setup__Fenv
-20000698   _Errno
-200006a0   main_func_sp
-200006a4   start
-ffffffff   __binit__
-ffffffff   __c_args__
-ffffffff   binit
-UNDEFED    SHT$$INIT_ARRAY$$Base
-UNDEFED    SHT$$INIT_ARRAY$$Limit
+address   name                     
+-------   ----                     
+00000000  __TI_static_base__       
+00000000  g_pfnVectors             
+000002b6  asteroidm                
+00000400  __STACK_SIZE             
+000005d6  coin_image               
+000008f6  coin_fade_image          
+00000c16  font8x8_basic            
+00001016  powerup_shield_image     
+0000171e  powerup_points_image     
+00001e26  powerup_star_image       
+0000252e  spaceshipImage           
+00002fee  invulnerable_spaceship   
+00003aae  spaceship_item_acquired  
+0000456e  explosionImage0          
+000058f6  explosionImage1          
+00006c7e  explosionImage2          
+00008006  explosionImage3          
+0000938e  start_image              
+0000e0d4  _ctypes_                 
+0000e1d9  Init_Explosions          
+0000e291  Init_PowerUp             
+0000e2e1  Init_Asteroids           
+0000e361  Init_StartScreen         
+0000e409  PowerUp_Status           
+0000e4a9  collision                
+0000e579  read_highscore           
+0000e5b9  writeCharacter           
+0000e629  writeString              
+0000e651  write_highscore          
+0000e689  displayEndScreen         
+0000e729  printBMP2                
+0000e831  displayExplosionAnimation
+0000e901  playSound                
+0000e929  loopEndGame              
+0000e959  detectPlayerCollision    
+0000ead1  playerControl            
+0000ed01  deployAsteroid           
+0000ee61  moveAsteroid             
+0000eff1  movePowerUp              
+0000f121  displayCountDown         
+0000f1e9  level_one                
+0000f259  Init_Player              
+0000f3d1  resetGame                
+0000f481  Touchscreen_Handler      
+0000f4b9  Sound_Handler            
+0000f4f9  GPIOPortA_Handler        
+0000f551  randomValue              
+0000f569  spawnPowerUp             
+0000f5f1  level_two                
+0000f791  Distance_Handler         
+0000f7e1  addAsteroidMedium        
+0000f821  Asteroid_Handler         
+00010a8b  __TI_printfi             
+00010c67  _nop                     
+00010c69  writeCmd                 
+00010cb9  writeReg                 
+00010d31  Init_LCD                 
+00010fd9  setWindow                
+00011011  clearLCD                 
+000110e9  clearArea                
+00011201  setCursor                
+00011219  Init_PLL                 
+00011281  Init_Port                
+00011429  delayMS                  
+00011469  Init_Analog              
+00011511  check_eeprom_done        
+00011529  Init_EEPROM              
+00011581  ADC0                     
+000115b1  ADC1                     
+000115e1  erase_eeprom             
+00011611  sqrt                     
+00011991  ldexp                    
+00011c31  __aeabi_uldivmod         
+00011e25  _system_pre_init         
+00011e29  Init_Interrupt           
+00011eb1  Init_Timer0A             
+00011f19  Init_Timer1A             
+00011f81  Init_Sound               
+00011fe9  __aeabi_dsub             
+00011ff3  __aeabi_dadd             
+0001219f  __aeabi_ddiv             
+000122d5  _Dunscale                
+000123ef  __aeabi_dmul             
+000124eb  __TI_decompress_rle24    
+000124f1  main                     
+000125e9  __aeabi_memcpy           
+000125e9  __aeabi_memcpy4          
+000125e9  __aeabi_memcpy8          
+000125e9  memcpy                   
+00012685  __aeabi_cdcmpeq          
+00012685  __aeabi_cdcmple          
+0001270b  __aeabi_cdrcmple         
+00012791  __aeabi_memclr           
+00012791  __aeabi_memclr4          
+00012791  __aeabi_memclr8          
+00012793  __aeabi_memset           
+00012793  __aeabi_memset4          
+00012793  __aeabi_memset8          
+00012799  memset                   
+0001280d  __TI_auto_init           
+000128e3  ltoa                     
+0001295b  sprintf                  
+0001298d  _c_int00                 
+000129dd  copy_in                  
+00012a29  __aeabi_d2iz             
+00012a71  srand                    
+00012a85  rand                     
+00012ab9  C$$EXIT                  
+00012abd  abort                    
+00012ac5  exit                     
+00012afd  __aeabi_d2uiz            
+00012b41  signal                   
+00012b7d  _Feraise                 
+00012bad  __aeabi_i2d              
+00012bdb  raise                    
+00012c01  frexp                    
+00012c25  feraiseexcept            
+00012c45  __aeabi_ui2d             
+00012c69  ResetISR                 
+00012c85  _args_main               
+00012c9d  __TI_decompress_none     
+00012cab  __TI_zero_init           
+00012d08  __TI_Handler_Table_Base  
+00012d14  __TI_Handler_Table_Limit 
+00012d20  __TI_CINIT_Base          
+00012d30  __TI_CINIT_Limit         
+20000000  __stack                  
+20000200  __STACK_TOP              
+20000400  __STACK_END              
+20000400  reset                    
+20000418  player                   
+20000434  powerup                  
+20000464  explosion                
+200004c4  asteroid                 
+20000600  _Denorm                  
+20000610  _Eps                     
+20000620  _Hugeval                 
+20000630  _Snan                    
+20000640  _Rteps                   
+20000650  _Xbig                    
+20000658  _Zero                    
+20000660  _Nan                     
+20000670  _Inf                     
+20000680  _lock                    
+20000684  _unlock                  
+20000688  __TI_cleanup_ptr         
+2000068c  __TI_dtors_ptr           
+20000690  _Fenv                    
+20000694  _Tls_setup__Fenv         
+20000698  _Errno                   
+200006a0  main_func_sp             
+200006a4  start                    
+ffffffff  __binit__                
+ffffffff  __c_args__               
+ffffffff  binit                    
+UNDEFED   SHT$$INIT_ARRAY$$Base    
+UNDEFED   SHT$$INIT_ARRAY$$Limit   
 
-[160 symbols]
+[157 symbols]

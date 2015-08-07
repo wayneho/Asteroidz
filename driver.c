@@ -27,7 +27,7 @@ void delayMS(unsigned long ms){
   unsigned long i;
   Init_SysTick();
   for(i=0; i<ms; i++){
-      Wait_SysTick(80000);                            // wait 1ms
+      Wait_SysTick(33003);                            // wait 1ms
   }
 }
 
@@ -40,8 +40,8 @@ void Init_PLL(void){
     SYSCTL_RCC2_R &= ~0x00000070;                   			// configure for main oscillator source
     SYSCTL_RCC2_R &= ~0x00002000;                   			// activate PLL by clearing PWRDN
     //SYSCTL_RCC2_R |= 0x40000000;                    			// use 400 MHz PLL
-    //SYSCTL_RCC2_R = (SYSCTL_RCC2_R&~ 0x1FC00000) + (4<<22);     // clear system clock divider, configure for 80 MHz clock
-    SYSCTL_RCC2_R = (SYSCTL_RCC2_R&~ 0x1FC00000) + (5<<22);
+    //SYSCTL_RCC2_R = (SYSCTL_RCC2_R&~ 0x1FC00000) + (4<<22);   // clear system clock divider, configure for 80 MHz clock
+    SYSCTL_RCC2_R = (SYSCTL_RCC2_R&~ 0x1FC00000) + (6<<23);
     while((SYSCTL_RIS_R&0x00000040)==0){};          			// wait for PLLRIS bit
     SYSCTL_RCC2_R &= ~0x00000800;                   			// enable use of PLL by clearing BYPASS
 }

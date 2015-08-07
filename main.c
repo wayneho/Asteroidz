@@ -84,8 +84,10 @@ int main(void)
 
 	// game setup
 	clearLCD(white);
-	Init_Timer0A(8333333);     	// this timer controls asteroid spawn rate (20000000*12.5ns = 0.25s)
-	Init_Timer1A(33333333);			// this timer controls the game timer (80000000*12.5ns = 1s)
+	Init_Timer0A(8250825);     	// this timer controls asteroid spawn rate (20000000*12.5ns = 0.25s)
+	Init_Timer1A(33003300);		// this timer controls the game timer (80000000*12.5ns = 1s)
+	//Init_Timer0A(20000000);   // this timer controls asteroid spawn rate (20000000*12.5ns = 0.25s)
+	//Init_Timer1A(80000000);	// this timer controls the game timer (80000000*12.5ns = 1s)
 	Init_Explosions();
     Init_PowerUp();
 	Init_Asteroids();

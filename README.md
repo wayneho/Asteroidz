@@ -1,20 +1,16 @@
-Asteroidz
+## Asteroidz
+
+##### https://www.youtube.com/watch?v=VMtSydjA_Ow
 ========
-Created by: Wayne Ho 
+  Created by: Wayne Ho 
  
- 	The object of this game is to travel as far as possible while avoiding asteroids.  There are 3 power-ups that spawn randomly.
- 	The points power-up spawns most often and when picked up adds 3 points to the player's score.  The shield power-up allows the player to become
- 	invulnerable once activated by clicking the joystick.  The shield disappears after 3 seconds if it is not popped (by crashing into an asteroid).  The star power-up spawns the least
- 	frequent and it turns all the asteroids in the next 5 seconds into coins which can be picked up to add 1 point to the player's score.  After 4
-    seconds of picking up the star power up, the coin sprite changes to a faded red color to indicate that the coins are about to change back to asteroids.  As the game
-    progresses the asteroids move faster indicated by the level you are on (currently there are only 2 levels).
-    https://www.youtube.com/watch?v=DcXUXEgC4xE&list=UUe71GvrYlGx_wBIjqkTueFg
+ 	The object of this game is to travel as far as possible while avoiding asteroids. 
  
  	The game is using:
  		- two 12 bit ADCs to control the player's x and y movement
  		- three 32 bit Timer Interrupts:
  			- one to control the asteroid spawn rate
- 			- one to control the power up spawn rate and keep count of time travelled
+ 			- one to control the item spawn rate and keep count of time travelled
  			- one to create sound
  		- two GPIO Interrupts:
  			- PE3 is connected to the touch screen and starts or resets the game
@@ -23,7 +19,7 @@ Created by: Wayne Ho
  
  
 ========
-    Hardware:
+#### Hardware:
  
     1x Tiva C TM4C123G LaunchPad
     1x 3.2in tft LCD 240x320 resolution (ssd1289 controller)
@@ -33,7 +29,7 @@ Created by: Wayne Ho
     1x Audio Jack (SPC24110)
  
 ========
-    Connection:
+#### Connections:
  
     LCD_DIN 7:0 = PB 7:0
     LCD_RS = PD2

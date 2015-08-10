@@ -144,37 +144,39 @@ void getCenter(State *sprite)
 // Inputs: Sprite
 __inline void printBMP(State *sprite){
     int i;
+    int rgb;
     writeCmd(0x0022);
     for(i=0;i<sprite->imageSize;i++)
     {
-        writeData(sprite->image[i]);
+    	rgb = color_palette[sprite->image[i]];
+        writeData(rgb);
     }
 }
-
 // Prints sprites with transparent background
 // transparent color = 0xFFFF
 // slower than printBMP
 // Inputs: pointer to Sprite struct
 void printBMP2(State *sprite){
-    int i;
+    int i, rgb;
     int row, column;
     row = 0;
     column = 0;
 
     for(i=0;i<sprite->imageSize;i++)
     {
-        column++;                                               // column holds next x address
+        column++;                                               				// column holds next x address
         if(sprite->image[i] != TRANSPARENT_COLOR)                               // skip drawing if color is 0;
         {
+        	rgb = color_palette[sprite->image[i]];
             writeCmd(0x0022);
-            writeData(sprite->image[i]);
+            writeData(rgb);
         }
         else
         {
-            setCursor(sprite->x1+column, sprite->y1+row);       // manually move the address counter to next location
+            setCursor(sprite->x1+column, sprite->y1+row);       				// manually move the address counter to next location
         }
 
-        if(column == sprite->width )                            // if x address reaches the last pixel increment to next row and reset column
+        if(column == sprite->width )                            				// if x address reaches the last pixel increment to next row and reset column
         {
             row++;
             column = 0;
@@ -280,6 +282,7 @@ void PowerUp_Status(void){
 void deployAsteroid(void){
     int i;
     int j;
+    int rgb;
     unsigned int x_start, x_end,y_start, y_end, row;
 
 
@@ -301,7 +304,8 @@ void deployAsteroid(void){
                 asteroid[i].row = row;
                 for(j = asteroid[i].state.width*(row); j < (asteroid[i].state.width*asteroid[i].state.height)-1; j++)      // draw bottom row(s) as asteroid enters screen from above
                 {
-                    writeData(asteroid[i].state.image[j]);
+                	rgb = color_palette[asteroid[i].state.image[j]];
+                    writeData(rgb);
                 }
                 y_end = y_end + M;									// increment number of bottom rows to draw depending on speed of asteroid
                 asteroid[i].state.y2 = y_end;
@@ -766,15 +770,17 @@ void movePowerUp(void){
 // Displays the title of the game
 void Init_StartScreen(void)
 {
-    int i;
+    int i, rgb;
 
     setWindow(5, 140, 234, 182);
     writeCmd(0x0022);
     for(i = 0; i < 9890; i++)
     {
-        writeData(start_image[i]);
+    	rgb = color_palette[start_image[i]];
+        writeData(rgb);
     }
 }
+
 // Displays the string "LEVEL 2" and a count down to begin the level
 // Resets all powerups and asteroids
 void level_two(void){
